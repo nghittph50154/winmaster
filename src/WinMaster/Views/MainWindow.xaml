@@ -188,10 +188,7 @@
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="install">
                         <Button.Content>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⬇" FontSize="14"/>
-                                <TextBlock Text="INSTALL" FontSize="13" FontWeight="SemiBold"/>
-                            </StackPanel>
+                            <TextBlock Text="INSTALL" FontSize="13" FontWeight="SemiBold"/>
                         </Button.Content>
                         <Button.Foreground>
                             <SolidColorBrush Color="{Binding IsInstallActive, Converter={StaticResource ActiveMenuToBrush}, ConverterParameter=color}"/>

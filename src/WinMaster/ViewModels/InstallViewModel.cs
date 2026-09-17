@@ -153,7 +153,7 @@ public partial class InstallViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private string _customInstallPath = string.Empty;
+    private string _customInstallPath = FileSystemHelper.GetDownloadsFolder();
 
     [ObservableProperty]
     private bool _isInteractiveMode = true;
@@ -176,7 +176,7 @@ public partial class InstallViewModel : ObservableObject
     [RelayCommand]
     private void ClearCustomInstallPath()
     {
-        CustomInstallPath = string.Empty;
+        CustomInstallPath = FileSystemHelper.GetDownloadsFolder();
     }
 
     [RelayCommand(CanExecute = nameof(CanRun))]

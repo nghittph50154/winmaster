@@ -212,7 +212,8 @@
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="CaretBrush" Value="{StaticResource AccentPrimaryBrush}"/>
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Padding" Value="40,0,16,0"/>
+        <Setter Property="Padding" Value="14,0,14,0"/>
+        <Setter Property="MaxLength" Value="50"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
         <Setter Property="Template">
@@ -224,14 +225,6 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="10">
                         <Grid>
-                            <TextBlock x:Name="placeholder"
-                                       Text="Search applications..."
-                                       Foreground="{StaticResource TextMutedBrush}"
-                                       FontSize="14"
-                                       VerticalAlignment="Center"
-                                       Margin="40,0,16,0"
-                                       Visibility="Collapsed"
-                                       IsHitTestVisible="False"/>
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"/>
@@ -240,9 +233,6 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentPrimaryBrush}"/>
-                        </Trigger>
-                        <Trigger Property="Text" Value="">
-                            <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

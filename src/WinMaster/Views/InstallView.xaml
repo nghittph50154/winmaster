@@ -30,18 +30,11 @@
                     BorderBrush="{StaticResource BorderSubtleBrush}"
                     BorderThickness="1">
                 <Grid>
-                    <!-- Search icon -->
-                    <TextBlock Text="🔍"
-                               FontSize="16"
-                               Margin="14,0,0,0"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left"
-                               IsHitTestVisible="False"/>
-
                     <TextBox x:Name="SearchBox"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource SearchBoxStyle}"
                              Height="44"
+                             MaxLength="50"
                              BorderThickness="0"
                              Background="Transparent"/>
                 </Grid>
@@ -117,24 +110,37 @@
                                                                         HorizontalAlignment="Center"
                                                                         Margin="12,14,12,10">
 
-                                                                <!-- App icon (emoji/text fallback) -->
+                                                                <!-- App icon (Image or Emoji fallback) -->
                                                                 <Border Width="48" Height="48"
                                                                         CornerRadius="12"
                                                                         Margin="0,0,0,10"
-                                                                        HorizontalAlignment="Center">
+                                                                        HorizontalAlignment="Center"
+                                                                        ClipToBounds="True">
                                                                     <Border.Background>
                                                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                                                             <GradientStop Color="#1E1E38" Offset="0"/>
                                                                             <GradientStop Color="#252545" Offset="1"/>
                                                                         </LinearGradientBrush>
                                                                     </Border.Background>
-                                                                    <!-- App icon emoji -->
-                                                                    <TextBlock x:Name="appIcon"
-                                                                               Text="{Binding IconEmoji}"
-                                                                               FontSize="26"
+                                                                    <Grid>
+                                                                        <!-- Image icon if downloaded -->
+                                                                        <Image Source="{Binding IconPath}"
+                                                                               Width="32" Height="32"
+                                                                               Stretch="Uniform"
+                                                                               RenderOptions.BitmapScalingMode="HighQuality"
                                                                                HorizontalAlignment="Center"
                                                                                VerticalAlignment="Center"
-                                                                               TextAlignment="Center"/>
+                                                                               Visibility="{Binding HasImageIcon, Converter={StaticResource BoolToVisibility}}"/>
+
+                                                                        <!-- Fallback emoji icon -->
+                                                                        <TextBlock x:Name="appIcon"
+                                                                                   Text="{Binding IconEmoji}"
+                                                                                   FontSize="24"
+                                                                                   HorizontalAlignment="Center"
+                                                                                   VerticalAlignment="Center"
+                                                                                   TextAlignment="Center"
+                                                                                   Visibility="{Binding HasImageIcon, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}"/>
+                                                                    </Grid>
                                                                 </Border>
 
                                                                 <!-- App name -->
@@ -232,7 +238,7 @@
                                      Foreground="{StaticResource TextPrimaryBrush}"
                                      FontSize="12"
                                      VerticalAlignment="Center"
-                                     ToolTip="Leave empty for default system directory, or type/browse a custom folder."/>
+                                     ToolTip="Default folder is Downloads. Type or click Browse... to change."/>
                         </Border>
 
                         <Button Grid.Column="2"

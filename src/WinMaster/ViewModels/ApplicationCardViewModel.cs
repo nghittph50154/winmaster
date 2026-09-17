@@ -51,6 +51,7 @@ public partial class ApplicationCardViewModel : ObservableObject
         "foxit-reader"      => "📄",
         "goodnotes"         => "📓",
         "steam"             => "🎮",
+        "genshin-impact"    => "⚔",
         "roblox"            => "🎲",
         "xmcl"              => "⛏",
         "geforce-now"       => "🎯",
@@ -88,6 +89,33 @@ public partial class ApplicationCardViewModel : ObservableObject
         "python-3128"       => "🐍",
         _                   => "📦"
     };
+
+    /// <summary>Resolves downloaded icon image path if present, otherwise returns null.</summary>
+    public string? IconPath
+    {
+        get
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var candidates = new[]
+            {
+                Path.Combine(baseDir, "Assets", "Icons", $"{_entry.Id}.png"),
+                Path.Combine(baseDir, "Assets", "Icons", $"{_entry.Id}.ico"),
+                Path.Combine(baseDir, "Assets", "Icons", $"{_entry.Id}.jpg"),
+                Path.Combine(baseDir, "Assets", "Icons", $"{_entry.Id}.svg"),
+                Path.Combine(baseDir, "Assets", "Icons", $"{_entry.Id}.webp")
+            };
+
+            foreach (var path in candidates)
+            {
+                if (File.Exists(path))
+                    return path;
+            }
+
+            return null;
+        }
+    }
+
+    public bool HasImageIcon => !string.IsNullOrEmpty(IconPath);
 
     /// <summary>Returns the raw ApplicationEntry for the installer engine.</summary>
     public ApplicationEntry Entry => _entry;

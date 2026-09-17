@@ -40,9 +40,11 @@
     </Content>
   </ItemGroup>
 
-  <!-- App icon -->
+  <!-- App assets and icons -->
   <ItemGroup>
-    <Resource Include="Assets\**\*" />
+    <None Include="Assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

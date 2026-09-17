@@ -325,7 +325,7 @@
       "id": "python3",
       "name": "Python 3",
       "displayName": "Python 3",
-      "category": "Development",
+      "category": "Python",
       "description": "Python programming language (latest stable)",
       "tags": ["python", "programming", "developer"],
       "installer": {
@@ -484,6 +484,27 @@
         "executableName": "steam.exe"
       },
       "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "genshin-impact",
+      "name": "Genshin Impact",
+      "displayName": "Genshin Impact",
+      "category": "Games",
+      "description": "Open-world action RPG game by miHoYo / COGNOSPHERE",
+      "tags": ["gaming", "rpg", "anime", "genshin", "mihoyo"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "COGNOSPHERE.GenshinImpact"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "GenshinImpact.exe"
+      },
+      "requiresAdmin": true,
       "versionPolicy": "latest",
       "iconSource": "embedded",
       "status": "stable"
@@ -1145,7 +1166,7 @@
       "id": "yindiao-g17-drive",
       "name": "YINDIAO-G17 Drive",
       "displayName": "YINDIAO G17",
-      "category": "Fixed Hardware Files",
+      "category": "Drive Mouse",
       "description": "YINDIAO G17 keyboard driver package",
       "tags": ["driver", "keyboard", "yindiao"],
       "installer": {
@@ -1166,7 +1187,7 @@
       "id": "inphic-drive",
       "name": "Inphic Drive",
       "displayName": "Inphic Drive",
-      "category": "Fixed Hardware Files",
+      "category": "Drive Mouse",
       "description": "Inphic peripheral driver package",
       "tags": ["driver", "inphic"],
       "installer": {
@@ -1187,7 +1208,7 @@
       "id": "aula-f87-drive",
       "name": "AULA F87 Pro Drive",
       "displayName": "AULA F87 Pro",
-      "category": "Fixed Hardware Files",
+      "category": "Drive Mouse",
       "description": "AULA F87 Pro keyboard driver package",
       "tags": ["driver", "keyboard", "aula"],
       "installer": {
@@ -1208,7 +1229,7 @@
       "id": "python-3128",
       "name": "Python 3.12.8",
       "displayName": "Python 3.12.8",
-      "category": "Fixed Python",
+      "category": "Python",
       "description": "Python 3.12.8 — fixed version installer",
       "tags": ["python", "programming", "fixed"],
       "installer": {
