@@ -25,7 +25,7 @@ public partial class MainViewModel : ObservableObject
     public bool IsMenu2Active => ActiveMenu == "menu2";
     public bool IsMenu3Active => ActiveMenu == "menu3";
 
-    public string AppVersion => "v1.0.0";
+    public string AppVersion => "v1.1";
 
     public MainViewModel(InstallViewModel installVM, TweaksViewModel tweaksVM)
     {
