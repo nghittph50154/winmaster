@@ -37,9 +37,10 @@ Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 # Locate WinMaster workspace or run via dotnet if installed
 Set-Location -Path "$extractPath\winmaster-main"
 
-if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-    Write-Host "Launching WinMaster..." -ForegroundColor Cyan
-    dotnet run --project "src/WinMaster/WinMaster.csproj"
-} else {
-    Write-Host "Dotnet SDK not found. Please install .NET 10 runtime." -ForegroundColor Red
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+    Write-Host "Dotnet SDK / Runtime not found. Installing .NET Desktop Runtime..." -ForegroundColor Yellow
+    winget install Microsoft.DotNet.DesktopRuntime.9 --silent --accept-package-agreements --accept-source-agreements
 }
+
+Write-Host "Launching WinMaster..." -ForegroundColor Cyan
+dotnet run --project "src/WinMaster/WinMaster.csproj"
