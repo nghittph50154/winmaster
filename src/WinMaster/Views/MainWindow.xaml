@@ -199,10 +199,7 @@
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="menu2">
                         <Button.Content>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⚙" FontSize="14"/>
-                                <TextBlock Text="TWEAKS" FontSize="13" FontWeight="SemiBold"/>
-                            </StackPanel>
+                            <TextBlock Text="TWEAKS" FontSize="13" FontWeight="SemiBold"/>
                         </Button.Content>
                     </Button>
 
@@ -212,7 +209,6 @@
                             CommandParameter="menu3">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🔧" FontSize="14"/>
                                 <TextBlock Text="SYSTEM TOOLS" FontSize="13" FontWeight="SemiBold"/>
                                 <Border Background="{StaticResource SurfaceElevatedBrush}"
                                         CornerRadius="4" Padding="5,1">

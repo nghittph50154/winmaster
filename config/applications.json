@@ -1061,7 +1061,7 @@
       "id": "xp-pen",
       "name": "XP-Pen Tablet",
       "displayName": "XP-Pen",
-      "category": "Hardware / Driver",
+      "category": "Drive",
       "description": "XP-Pen drawing tablet driver and software",
       "tags": ["tablet", "driver", "drawing", "xp-pen"],
       "installer": {
@@ -1166,7 +1166,7 @@
       "id": "yindiao-g17-drive",
       "name": "YINDIAO-G17 Drive",
       "displayName": "YINDIAO G17",
-      "category": "Drive Mouse",
+      "category": "Drive",
       "description": "YINDIAO G17 keyboard driver package",
       "tags": ["driver", "keyboard", "yindiao"],
       "installer": {
@@ -1187,7 +1187,7 @@
       "id": "inphic-drive",
       "name": "Inphic Drive",
       "displayName": "Inphic Drive",
-      "category": "Drive Mouse",
+      "category": "Drive",
       "description": "Inphic peripheral driver package",
       "tags": ["driver", "inphic"],
       "installer": {
@@ -1208,7 +1208,7 @@
       "id": "aula-f87-drive",
       "name": "AULA F87 Pro Drive",
       "displayName": "AULA F87 Pro",
-      "category": "Drive Mouse",
+      "category": "Drive",
       "description": "AULA F87 Pro keyboard driver package",
       "tags": ["driver", "keyboard", "aula"],
       "installer": {

@@ -42,28 +42,32 @@ public partial class TweaksViewModel : ObservableObject
             "Windows & Office Activation",
             "Chạy script kích hoạt bản quyền Windows và Office qua MAS (Microsoft Activation Scripts).",
             "powershell iex (irm https://get.activated.win)",
-            "cmd");
+            "cmd",
+            showCode: true);
 
         var opt2 = new TweakOptionViewModel(
             "winutil",
             "WinUtil (Chris Titus Tech)",
             "Mở công cụ WinUtil hỗ trợ Tweak, tối ưu hóa hệ thống Windows và cài đặt phần mềm.",
             "irm \"https://christitus.com/win\" | iex",
-            "powershell");
+            "powershell",
+            showCode: true);
 
         var opt3 = new TweakOptionViewModel(
             "idm_act",
             "IDM Activation (IAS)",
             "Kích hoạt và tự động cập nhật bản quyền Internet Download Manager (IDM).",
             "irm https://coporton.com/ias | iex",
-            "powershell");
+            "powershell",
+            showCode: true);
 
         var opt4 = new TweakOptionViewModel(
             "winrar_act",
             "WinRAR Activation",
             "Tự động tải và cài đặt bản quyền rarreg.key vào thư mục WinRAR trên máy.",
-            "irm https://raw.githubusercontent.com/nghittph50154/winmaster/main/winrar.ps1 | iex",
-            "powershell");
+            "irm https://raw.githubusercontent.com/nghittph50154/winmaster/main/scripts/winrar.ps1 | iex",
+            "powershell",
+            showCode: false);
 
         Options.Add(opt1);
         Options.Add(opt2);
