@@ -323,8 +323,8 @@
 
     {
       "id": "python3",
-      "name": "Python 3",
-      "displayName": "Python 3",
+      "name": "Python",
+      "displayName": "Python",
       "category": "Python",
       "description": "Python programming language (latest stable)",
       "tags": ["python", "programming", "developer"],
@@ -533,8 +533,8 @@
 
     {
       "id": "xmcl",
-      "name": "X Minecraft Launcher",
-      "displayName": "XMCL",
+      "name": "Minecraft X",
+      "displayName": "Minecraft X",
       "category": "Games",
       "description": "Modern Minecraft launcher — xmcl.app",
       "tags": ["gaming", "minecraft", "launcher"],
