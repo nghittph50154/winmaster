@@ -1,7 +1,5 @@
 # PowerShell online launcher script for WinMaster
 $ErrorActionPreference = 'Stop'
-
-# Disable PowerShell GUI progress bar (speeds up Invoke-WebRequest by 10x!)
 $ProgressPreference = 'SilentlyContinue'
 
 # Auto elevate to Administrator if not already elevated
@@ -24,23 +22,15 @@ Add-MpPreference -ExclusionPath $workDir -ErrorAction SilentlyContinue
 
 $zipPath = "$workDir\WinMaster.zip"
 $extractPath = "$workDir\App"
-$zipUrl = "https://github.com/nghittph50154/winmaster/archive/refs/heads/main.zip"
+$zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
 
-Write-Host "Downloading WinMaster latest release..." -ForegroundColor Green
+Write-Host "Downloading WinMaster standalone application..." -ForegroundColor Green
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
 
-Write-Host "Extracting files..." -ForegroundColor Green
+Write-Host "Extracting WinMaster..." -ForegroundColor Green
 if (Test-Path $extractPath) { Remove-Item -Path $extractPath -Recurse -Force }
 Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 
-# Locate WinMaster workspace or run via dotnet if installed
-Set-Location -Path "$extractPath\winmaster-main"
-
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Host "Dotnet SDK / Runtime not found. Installing .NET Desktop Runtime..." -ForegroundColor Yellow
-    winget install Microsoft.DotNet.DesktopRuntime.9 --silent --accept-package-agreements --accept-source-agreements
-}
-
 Write-Host "Launching WinMaster..." -ForegroundColor Cyan
-dotnet run --project "src/WinMaster/WinMaster.csproj"
+Start-Process -FilePath "$extractPath\WinMaster.exe"
