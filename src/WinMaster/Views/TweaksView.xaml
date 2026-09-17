@@ -1,0 +1,207 @@
+<UserControl x:Class="WinMaster.Views.TweaksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:WinMaster.ViewModels"
+             mc:Ignorable="d"
+             Background="{StaticResource BackgroundDeepBrush}"
+             d:DataContext="{d:DesignInstance vm:TweaksViewModel}">
+
+    <UserControl.Resources>
+        <!-- Custom Radio Card Style -->
+        <Style x:Key="RadioCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#1A1A2E"/>
+            <Setter Property="BorderBrush" Value="#2E2E50"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>           <!-- Main option area -->
+            <ColumnDefinition Width="340"/>          <!-- Log panel -->
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══ LEFT: Tweaks Options & Actions ═════════════════════════════ -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>    <!-- Section Title -->
+                <RowDefinition Height="*"/>        <!-- Options list -->
+                <RowDefinition Height="Auto"/>    <!-- Bottom Action Bar -->
+            </Grid.RowDefinitions>
+
+            <!-- Header Title -->
+            <StackPanel Grid.Row="0" Margin="24,20,24,16">
+                <TextBlock Text="⚙ TWEAKS &amp; ACTIVATION"
+                           FontSize="16" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Chọn công cụ hoặc script tối ưu hệ thống và bấm RUN để thực thi với quyền Admin."
+                           FontSize="12"
+                           Foreground="{StaticResource TextMutedBrush}"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Radio Options List -->
+            <ScrollViewer Grid.Row="1" Margin="24,0,16,0" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Options}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:TweakOptionViewModel}">
+                            <Border x:Name="cardBorder" Style="{StaticResource RadioCardStyle}">
+                                <Grid MouseLeftButtonDown="OptionCard_Click">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>   <!-- Radio Indicator -->
+                                        <ColumnDefinition Width="*"/>      <!-- Text Content -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Radio Outer Circle -->
+                                    <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11"
+                                            BorderThickness="2" VerticalAlignment="Top" Margin="0,2,16,0"
+                                            x:Name="radioCircle">
+                                        <Border.BorderBrush>
+                                            <SolidColorBrush Color="#4E4E70"/>
+                                        </Border.BorderBrush>
+                                        <!-- Inner Selected Dot -->
+                                        <Ellipse x:Name="radioDot" Width="10" Height="10" Fill="{StaticResource AccentPrimaryBrush}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    </Border>
+
+                                    <!-- Content Info -->
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Title}"
+                                                   FontSize="14" FontWeight="Bold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        
+                                        <TextBlock Text="{Binding Description}"
+                                                   FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                                   Margin="0,4,0,8" TextWrapping="Wrap"/>
+
+                                        <!-- Code block & Copy button -->
+                                        <Border Background="#121220" CornerRadius="6" Padding="10,8" BorderBrush="#2A2A48" BorderThickness="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding CommandText}"
+                                                           FontFamily="Consolas" FontSize="11" Foreground="#00E676"
+                                                           VerticalAlignment="Center" TextWrapping="Wrap"
+                                                           Margin="0,0,8,0"/>
+                                                <Button Grid.Column="1"
+                                                        Command="{Binding CopyCommand}"
+                                                        ToolTip="Copy code"
+                                                        Padding="8,4"
+                                                        Background="#2E2E50" Foreground="#FFFFFF"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="📋 " FontSize="10"/>
+                                                        <TextBlock Text="Copy" FontSize="11" FontWeight="SemiBold"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter TargetName="cardBorder" Property="BorderBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                                    <Setter TargetName="cardBorder" Property="Background" Value="#222240"/>
+                                    <Setter TargetName="radioCircle" Property="BorderBrush" Value="{StaticResource AccentPrimaryBrush}"/>
+                                    <Setter TargetName="radioDot" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Bottom Action Bar -->
+            <Border Grid.Row="2"
+                    Background="{StaticResource BackgroundBrush}"
+                    BorderBrush="{StaticResource BorderSubtleBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="24,16">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
+                        <TextBlock Text="🛡 Đã tích hợp thực thi tự động qua PowerShell / CMD với quyền Administrator"
+                                   FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                    </StackPanel>
+
+                    <!-- RUN Button -->
+                    <Button Content="▶  RUN"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalAlignment="Right"
+                            FontSize="13" Padding="36,10"
+                            Command="{Binding RunCommand}"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ═══ RIGHT: Log Panel ═════════════════════════════════════════ -->
+        <Border Grid.Column="1"
+                Background="{StaticResource BackgroundBrush}"
+                BorderBrush="{StaticResource BorderSubtleBrush}"
+                BorderThickness="1,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>   <!-- Header -->
+                    <RowDefinition Height="*"/>       <!-- Log Entries -->
+                </Grid.RowDefinitions>
+
+                <!-- Panel Header -->
+                <Border Grid.Row="0" Padding="20,16"
+                        BorderBrush="{StaticResource BorderSubtleBrush}"
+                        BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📋" FontSize="16" Margin="0,0,8,0"/>
+                        <TextBlock Text="TWEAKS LOG"
+                                   FontSize="11" FontWeight="Bold"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Log ScrollViewer -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding LogEntries}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="16,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Timestamp, StringFormat=HH:mm:ss}"
+                                                   FontSize="10" FontFamily="Consolas"
+                                                   Foreground="{StaticResource TextMutedBrush}"
+                                                   Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Icon}"
+                                                   FontSize="11"
+                                                   Foreground="{Binding Level, Converter={StaticResource LogLevelToColor}}"
+                                                   Margin="0,0,6,0"/>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Message}"
+                                                   FontSize="11" FontFamily="Consolas"
+                                                   Foreground="{Binding Level, Converter={StaticResource LogLevelToColor}}"
+                                                   TextWrapping="Wrap"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

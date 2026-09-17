@@ -39,6 +39,7 @@ public partial class App : Application
 
         var registry = new AppRegistryService();
         var installVM = new InstallViewModel(registry, engine, logService);
+        var tweaksVM = new TweaksViewModel(logService);
 
         try
         {
@@ -53,7 +54,7 @@ public partial class App : Application
                 MessageBoxImage.Error);
         }
 
-        var mainVM = new MainViewModel(installVM);
+        var mainVM = new MainViewModel(installVM, tweaksVM);
         var mainWindow = new MainWindow { DataContext = mainVM };
         mainWindow.Show();
     }

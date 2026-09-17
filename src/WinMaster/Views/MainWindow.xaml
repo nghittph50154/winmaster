@@ -21,6 +21,9 @@
         <DataTemplate DataType="{x:Type vm:InstallViewModel}">
             <views:InstallView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TweaksViewModel}">
+            <views:TweaksView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
             <views:PlaceholderView/>
         </DataTemplate>
@@ -198,7 +201,7 @@
                     <!-- Nav indicator for Install -->
                     <Border Width="2" Height="20" Background="{StaticResource BorderSubtleBrush}" Margin="4,0"/>
 
-                    <!-- MENU 2 tab -->
+                    <!-- MENU 2 tab (TWEAKS) -->
                     <Button Style="{StaticResource NavButtonStyle}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="menu2">
@@ -206,11 +209,6 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚙" FontSize="14"/>
                                 <TextBlock Text="TWEAKS" FontSize="13" FontWeight="SemiBold"/>
-                                <Border Background="{StaticResource SurfaceElevatedBrush}"
-                                        CornerRadius="4" Padding="5,1">
-                                    <TextBlock Text="SOON" FontSize="9" Foreground="{StaticResource TextMutedBrush}"
-                                               FontWeight="SemiBold"/>
-                                </Border>
                             </StackPanel>
                         </Button.Content>
                     </Button>
