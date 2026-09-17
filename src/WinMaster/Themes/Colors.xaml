@@ -1,0 +1,82 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════
+         WINMASTER COLOR PALETTE — Dark Premium Theme
+         ═══════════════════════════════════════════════ -->
+
+    <!-- Background layers -->
+    <Color x:Key="BackgroundDeepColor">#0F0F1A</Color>
+    <Color x:Key="BackgroundColor">#13131F</Color>
+    <Color x:Key="SurfaceColor">#1A1A2E</Color>
+    <Color x:Key="SurfaceElevatedColor">#212138</Color>
+    <Color x:Key="SurfaceHighColor">#2A2A48</Color>
+    <Color x:Key="BorderColor">#2E2E50</Color>
+    <Color x:Key="BorderSubtleColor">#20203A</Color>
+
+    <!-- Accent colors -->
+    <Color x:Key="AccentPrimaryColor">#6C63FF</Color>
+    <Color x:Key="AccentSecondaryColor">#00D4AA</Color>
+    <Color x:Key="AccentGlowColor">#3D35CC</Color>
+
+    <!-- State colors -->
+    <Color x:Key="SuccessColor">#00C896</Color>
+    <Color x:Key="ErrorColor">#FF4C6A</Color>
+    <Color x:Key="WarningColor">#FFB347</Color>
+    <Color x:Key="InfoColor">#4FC3F7</Color>
+
+    <!-- Text -->
+    <Color x:Key="TextPrimaryColor">#F0F0FF</Color>
+    <Color x:Key="TextSecondaryColor">#8888AA</Color>
+    <Color x:Key="TextMutedColor">#4A4A70</Color>
+    <Color x:Key="TextAccentColor">#6C63FF</Color>
+
+    <!-- Brushes derived from colors -->
+    <SolidColorBrush x:Key="BackgroundDeepBrush" Color="{StaticResource BackgroundDeepColor}"/>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}"/>
+    <SolidColorBrush x:Key="SurfaceHighBrush" Color="{StaticResource SurfaceHighColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderSubtleBrush" Color="{StaticResource BorderSubtleColor}"/>
+
+    <SolidColorBrush x:Key="AccentPrimaryBrush" Color="{StaticResource AccentPrimaryColor}"/>
+    <SolidColorBrush x:Key="AccentSecondaryBrush" Color="{StaticResource AccentSecondaryColor}"/>
+
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
+
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}"/>
+    <SolidColorBrush x:Key="TextAccentBrush" Color="{StaticResource TextAccentColor}"/>
+
+    <!-- Gradient brushes -->
+    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#6C63FF" Offset="0"/>
+        <GradientStop Color="#00D4AA" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#0F0F1A" Offset="0"/>
+        <GradientStop Color="#1A1A2E" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="CardHoverGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#1E1E38" Offset="0"/>
+        <GradientStop Color="#232344" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Card selected border gradient -->
+    <LinearGradientBrush x:Key="CardSelectedBorderBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#6C63FF" Offset="0"/>
+        <GradientStop Color="#00D4AA" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Subtle glow effect color -->
+    <Color x:Key="GlowColor">#406C63FF</Color>
+    <SolidColorBrush x:Key="GlowBrush" Color="{StaticResource GlowColor}"/>
+
+</ResourceDictionary>

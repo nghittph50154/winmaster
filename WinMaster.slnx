@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WinMaster/WinMaster.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WinMaster.Tests/WinMaster.Tests.csproj" />
+  </Folder>
+</Solution>

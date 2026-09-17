@@ -1,0 +1,41 @@
+# WinMaster .gitignore
+
+# Build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+
+# NuGet packages
+*.nupkg
+packages/
+
+# dotnet publish output
+publish/
+
+# Sources directory — user provides these files; do NOT commit to public repo
+# You may commit sources/ if this is a private repository
+sources/python/
+sources/capcut/
+sources/drivers/
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files
+.env
+.env.local
+
+# Visual Studio crash reports
+*.dmp

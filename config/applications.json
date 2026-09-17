@@ -1,0 +1,1231 @@
+{
+  "version": "1.0",
+  "remoteBaseUrl": "https://raw.githubusercontent.com/YOUR_USERNAME/WinMaster/main",
+  "applications": [
+
+    {
+      "id": "microsoft-edge",
+      "name": "Microsoft Edge",
+      "displayName": "Microsoft Edge",
+      "category": "Browsers",
+      "description": "Microsoft's Chromium-based browser",
+      "tags": ["browser", "microsoft", "chromium"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Microsoft.Edge"
+      },
+      "verification": {
+        "strategies": ["registry", "executable"],
+        "registryKey": "HKLM:\\SOFTWARE\\Microsoft\\EdgeUpdate\\Clients\\{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}",
+        "executableName": "msedge.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "google-chrome",
+      "name": "Google Chrome",
+      "displayName": "Google Chrome",
+      "category": "Browsers",
+      "description": "Fast, secure browser by Google",
+      "tags": ["browser", "google", "chromium"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Google.Chrome"
+      },
+      "verification": {
+        "strategies": ["registry", "executable"],
+        "registryKey": "HKLM:\\SOFTWARE\\Google\\Chrome",
+        "executableName": "chrome.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "brave",
+      "name": "Brave",
+      "displayName": "Brave",
+      "category": "Browsers",
+      "description": "Privacy-focused browser with built-in ad blocking",
+      "tags": ["browser", "privacy", "chromium"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Brave.Brave"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "brave.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "tor-browser",
+      "name": "Tor Browser",
+      "displayName": "Tor Browser",
+      "category": "Browsers",
+      "description": "Anonymous browsing via the Tor network",
+      "tags": ["browser", "privacy", "tor", "anonymous"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "TorProject.TorBrowser"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "firefox.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "discord",
+      "name": "Discord",
+      "displayName": "Discord",
+      "category": "Communications",
+      "description": "Voice, video and text communication for communities",
+      "tags": ["chat", "voice", "gaming", "community"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Discord.Discord"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Discord.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "zoom",
+      "name": "Zoom",
+      "displayName": "Zoom",
+      "category": "Communications",
+      "description": "Video conferencing and online meetings",
+      "tags": ["meeting", "video", "conference"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Zoom.Zoom"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Zoom.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "telegram",
+      "name": "Telegram",
+      "displayName": "Telegram",
+      "category": "Communications",
+      "description": "Fast and secure messaging app",
+      "tags": ["chat", "messaging", "secure"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Telegram.TelegramDesktop"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Telegram.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "zalo",
+      "name": "Zalo",
+      "displayName": "Zalo",
+      "category": "Communications",
+      "description": "Vietnamese messaging and social media app",
+      "tags": ["chat", "messaging", "vietnam"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "VNG.Zalo"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Zalo.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "revoltg",
+      "name": "RevoltG",
+      "displayName": "RevoltG",
+      "category": "Communications",
+      "description": "Revolt.chat open-source Discord alternative",
+      "tags": ["chat", "open-source", "revolt"],
+      "installer": {
+        "type": "direct",
+        "directUrl": "https://github.com/revoltchat/desktop/releases/latest/download/Revolt-Setup.exe"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Revolt.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "chatgpt-desktop",
+      "name": "ChatGPT Desktop",
+      "displayName": "ChatGPT",
+      "category": "Development",
+      "description": "OpenAI ChatGPT desktop application",
+      "tags": ["ai", "openai", "chatgpt"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "OpenAI.ChatGPT"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "ChatGPT.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "codex",
+      "name": "Codex",
+      "displayName": "Codex",
+      "category": "Development",
+      "description": "OpenAI Codex CLI — AI coding assistant in terminal",
+      "tags": ["ai", "openai", "cli", "coding"],
+      "installer": {
+        "type": "powershell",
+        "powerShellScript": "install-codex.ps1"
+      },
+      "verification": {
+        "strategies": ["command"],
+        "command": "codex --version"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "displayName": "Cursor",
+      "category": "Development",
+      "description": "AI-powered code editor built on VS Code",
+      "tags": ["editor", "ai", "coding", "vscode"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Anysphere.Cursor"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Cursor.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "git",
+      "name": "Git",
+      "displayName": "Git",
+      "category": "Development",
+      "description": "Distributed version control system",
+      "tags": ["git", "version-control", "developer"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Git.Git"
+      },
+      "verification": {
+        "strategies": ["command", "registry"],
+        "command": "git --version",
+        "registryKey": "HKLM:\\SOFTWARE\\GitForWindows"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "github-desktop",
+      "name": "GitHub Desktop",
+      "displayName": "GitHub",
+      "category": "Development",
+      "description": "GitHub Desktop client — visual Git workflow",
+      "tags": ["git", "github", "version-control"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "GitHub.GitHubDesktop"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "GitHubDesktop.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "nodejs",
+      "name": "Node.js",
+      "displayName": "Node.js",
+      "category": "Development",
+      "description": "JavaScript runtime built on Chrome V8",
+      "tags": ["nodejs", "javascript", "runtime", "developer"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "OpenJS.NodeJS.LTS"
+      },
+      "verification": {
+        "strategies": ["command"],
+        "command": "node --version"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "python3",
+      "name": "Python 3",
+      "displayName": "Python 3",
+      "category": "Development",
+      "description": "Python programming language (latest stable)",
+      "tags": ["python", "programming", "developer"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Python.Python.3"
+      },
+      "verification": {
+        "strategies": ["command"],
+        "command": "python --version"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "vscode",
+      "name": "VS Code",
+      "displayName": "VS Code",
+      "category": "Development",
+      "description": "Visual Studio Code — powerful source code editor",
+      "tags": ["editor", "microsoft", "developer", "vscode"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Microsoft.VisualStudioCode"
+      },
+      "verification": {
+        "strategies": ["command", "executable"],
+        "command": "code --version",
+        "executableName": "Code.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "displayName": "Antigravity",
+      "category": "Development",
+      "description": "Google Antigravity IDE",
+      "tags": ["ide", "google", "ai"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Google.Antigravity"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Antigravity.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "notepadplusplus",
+      "name": "Notepad++",
+      "displayName": "Notepad++",
+      "category": "Development",
+      "description": "Feature-rich text and code editor",
+      "tags": ["editor", "text", "notepad"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Notepad++.Notepad++"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "notepad++.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "office365",
+      "name": "Microsoft Office 365",
+      "displayName": "Office 365",
+      "category": "Microsoft",
+      "description": "Microsoft 365 productivity suite",
+      "tags": ["office", "microsoft", "word", "excel", "productivity"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Microsoft.Office"
+      },
+      "verification": {
+        "strategies": ["registry"],
+        "registryKey": "HKLM:\\SOFTWARE\\Microsoft\\Office"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "foxit-reader",
+      "name": "Foxit PDF Reader",
+      "displayName": "Foxit PDF",
+      "category": "Document",
+      "description": "Fast and lightweight PDF reader",
+      "tags": ["pdf", "reader", "document"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Foxit.FoxitReader"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "FoxitPDFReader.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "goodnotes",
+      "name": "GoodNotes",
+      "displayName": "GoodNotes",
+      "category": "Document",
+      "description": "Digital note-taking and PDF annotation app",
+      "tags": ["notes", "pdf", "writing"],
+      "installer": {
+        "type": "store",
+        "storeId": "9NBLGGH4S79R"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "steam",
+      "name": "Steam",
+      "displayName": "Steam",
+      "category": "Games",
+      "description": "Valve's digital gaming platform",
+      "tags": ["gaming", "steam", "valve"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Valve.Steam"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "steam.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "roblox",
+      "name": "Roblox",
+      "displayName": "Roblox",
+      "category": "Games",
+      "description": "Online game platform and creation system",
+      "tags": ["gaming", "roblox", "kids"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Roblox.Roblox"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "RobloxPlayerBeta.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "xmcl",
+      "name": "X Minecraft Launcher",
+      "displayName": "XMCL",
+      "category": "Games",
+      "description": "Modern Minecraft launcher — xmcl.app",
+      "tags": ["gaming", "minecraft", "launcher"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "xmcl.xmcl"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "xmcl.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "geforce-now",
+      "name": "GeForce NOW",
+      "displayName": "GeForce NOW",
+      "category": "Games",
+      "description": "NVIDIA cloud gaming streaming service",
+      "tags": ["gaming", "nvidia", "cloud", "streaming"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Nvidia.GeForceNow"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "GeForceNOW.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "riot-client",
+      "name": "Riot",
+      "displayName": "Riot",
+      "category": "Games",
+      "description": "Riot Games client — League of Legends, Valorant, etc.",
+      "tags": ["gaming", "riot", "valorant", "league"],
+      "installer": {
+        "type": "direct",
+        "directUrl": "https://valorant.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.exe"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "RiotClientServices.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "autoruns",
+      "name": "Autoruns",
+      "displayName": "Autoruns",
+      "category": "Utilities",
+      "description": "Microsoft Sysinternals startup manager",
+      "tags": ["sysinternals", "startup", "microsoft", "system"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Microsoft.Sysinternals.Autoruns"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Autoruns.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "7zip",
+      "name": "7-Zip",
+      "displayName": "7-Zip",
+      "category": "Utilities",
+      "description": "Free open-source file archiver",
+      "tags": ["archive", "zip", "compression"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "7zip.7zip"
+      },
+      "verification": {
+        "strategies": ["executable", "registry"],
+        "executableName": "7z.exe",
+        "registryKey": "HKLM:\\SOFTWARE\\7-Zip"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "anydesk",
+      "name": "AnyDesk",
+      "displayName": "AnyDesk",
+      "category": "Utilities",
+      "description": "Fast remote desktop software",
+      "tags": ["remote", "desktop", "access"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "AnyDeskSoftwareGmbH.AnyDesk"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "AnyDesk.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "cloudflare-warp",
+      "name": "Cloudflare WARP",
+      "displayName": "WARP",
+      "category": "Utilities",
+      "description": "Cloudflare WARP VPN and DNS service",
+      "tags": ["vpn", "cloudflare", "dns", "privacy"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Cloudflare.Warp"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "warp-svc.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "idm",
+      "name": "IDM",
+      "displayName": "IDM",
+      "category": "Utilities",
+      "description": "Internet Download Manager",
+      "tags": ["download", "manager", "internet"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Tonec.InternetDownloadManager"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "IDMan.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "rufus",
+      "name": "Rufus",
+      "displayName": "Rufus",
+      "category": "Utilities",
+      "description": "Create bootable USB drives",
+      "tags": ["bootable", "usb", "flash", "iso"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Rufus.Rufus"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "rufus.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "winrar",
+      "name": "WinRAR",
+      "displayName": "WinRAR",
+      "category": "Utilities",
+      "description": "File archiver supporting RAR and ZIP formats",
+      "tags": ["archive", "rar", "zip", "compression"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "RARLab.WinRAR"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "WinRAR.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "tailscale",
+      "name": "Tailscale",
+      "displayName": "Tailscale",
+      "category": "Utilities",
+      "description": "Zero config VPN built on WireGuard",
+      "tags": ["vpn", "network", "wireguard"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Tailscale.Tailscale"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "tailscale.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "xdm",
+      "name": "XDM",
+      "displayName": "XDM",
+      "category": "Utilities",
+      "description": "Xtreme Download Manager — open-source download accelerator",
+      "tags": ["download", "manager"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "subhra74.XtremeDownloadManager"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "xdm-app.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "bcuninstaller",
+      "name": "BCUninstaller",
+      "displayName": "BC Uninstaller",
+      "category": "Utilities",
+      "description": "Bulk Crap Uninstaller — advanced program uninstaller",
+      "tags": ["uninstaller", "cleanup", "system"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Klocman.BulkCrapUninstaller"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "BCUninstaller.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "memreduct",
+      "name": "Mem Reduct",
+      "displayName": "Mem Reduct",
+      "category": "Utilities",
+      "description": "Lightweight RAM memory cleaner",
+      "tags": ["ram", "memory", "optimization"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Henry++.MemReduct"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "memreduct.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "windirstat",
+      "name": "WinDirStat",
+      "displayName": "WinDirStat",
+      "category": "Utilities",
+      "description": "Windows disk usage analyzer and cleanup tool",
+      "tags": ["disk", "storage", "analyzer"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "WinDirStat.WinDirStat"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "windirstat.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "windhawk",
+      "name": "Windhawk",
+      "displayName": "Windhawk",
+      "category": "Utilities",
+      "description": "Windows customization marketplace and mod runtime",
+      "tags": ["customization", "mods", "windows"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "RamenSoftware.Windhawk"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "windhawk.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "nilesoft-shell",
+      "name": "Nilesoft Shell",
+      "displayName": "Nilesoft Shell",
+      "category": "Utilities",
+      "description": "Advanced context menu customizer for Windows",
+      "tags": ["context-menu", "customization", "shell"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Nilesoft.Shell"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "shell.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "fxsound",
+      "name": "FxSound",
+      "displayName": "FxSound",
+      "category": "Utilities",
+      "description": "Real-time audio enhancement and equalizer",
+      "tags": ["audio", "sound", "equalizer"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "FxSound.FxSound"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "FxSound.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "ventoy",
+      "name": "Ventoy",
+      "displayName": "Ventoy",
+      "category": "Utilities",
+      "description": "Create multiboot USB drives from ISO files",
+      "tags": ["bootable", "usb", "multiboot", "iso"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Ventoy.Ventoy"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Ventoy2Disk.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "deskin",
+      "name": "DeskIn",
+      "displayName": "DeskIn",
+      "category": "Utilities",
+      "description": "Remote desktop access tool",
+      "tags": ["remote", "desktop"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "ZulerTechnology.DeskIn"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "DeskIn.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "ultraviewer",
+      "name": "UltraViewer",
+      "displayName": "UltraViewer",
+      "category": "Utilities",
+      "description": "Remote desktop support software",
+      "tags": ["remote", "desktop", "support"],
+      "installer": {
+        "type": "direct",
+        "directUrl": "https://ultraviewer.net/download/ultraviewer_setup.exe"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "UltraViewer.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "evkey",
+      "name": "EVKey",
+      "displayName": "EVKey",
+      "category": "Utilities",
+      "description": "Vietnamese keyboard input method",
+      "tags": ["vietnamese", "input", "keyboard"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "EVKey.EVKey"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "EVKey.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "minitool-partition",
+      "name": "MiniTool Partition Wizard",
+      "displayName": "MiniTool PW",
+      "category": "Utilities",
+      "description": "Disk partition manager and recovery tool",
+      "tags": ["partition", "disk", "recovery"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "MiniTool.PartitionWizard.Free"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "PartitionWizard.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "obs-studio",
+      "name": "OBS Studio",
+      "displayName": "OBS Studio",
+      "category": "Utilities",
+      "description": "Free and open source streaming and recording software",
+      "tags": ["streaming", "recording", "obs"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "OBSProject.OBSStudio"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "obs64.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "vmware",
+      "name": "VMware",
+      "displayName": "VMware",
+      "category": "Utilities",
+      "description": "VMware Workstation Pro — virtual machines",
+      "tags": ["virtualization", "vm", "vmware"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "VMware.WorkstationPro"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "vmware.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "xp-pen",
+      "name": "XP-Pen Tablet",
+      "displayName": "XP-Pen",
+      "category": "Hardware / Driver",
+      "description": "XP-Pen drawing tablet driver and software",
+      "tags": ["tablet", "driver", "drawing", "xp-pen"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "XP-PEN.XP-PENTabletDriver"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "PenTablet.exe"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "capcut",
+      "name": "CapCut",
+      "displayName": "CapCut",
+      "category": "CapCut",
+      "description": "CapCut video editor (latest version)",
+      "tags": ["video", "editor", "capcut"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "ByteDance.CapCut"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "CapCut.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "capcut-1.5",
+      "name": "CapCut 1.5",
+      "displayName": "CapCut 1.5",
+      "category": "CapCut",
+      "description": "CapCut video editor — fixed version 1.5",
+      "tags": ["video", "editor", "capcut", "fixed"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/capcut",
+        "expectedPattern": "CapCut-1.5"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "capcut-7.0",
+      "name": "CapCut 7.0",
+      "displayName": "CapCut 7.0",
+      "category": "CapCut",
+      "description": "CapCut video editor — fixed version 7.0",
+      "tags": ["video", "editor", "capcut", "fixed"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/capcut",
+        "expectedPattern": "CapCut-7.0"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "capcut-7.7",
+      "name": "CapCut 7.7",
+      "displayName": "CapCut 7.7",
+      "category": "CapCut",
+      "description": "CapCut video editor — fixed version 7.7",
+      "tags": ["video", "editor", "capcut", "fixed"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/capcut",
+        "expectedPattern": "CapCut-7.7"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "yindiao-g17-drive",
+      "name": "YINDIAO-G17 Drive",
+      "displayName": "YINDIAO G17",
+      "category": "Fixed Hardware Files",
+      "description": "YINDIAO G17 keyboard driver package",
+      "tags": ["driver", "keyboard", "yindiao"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/drivers",
+        "expectedPattern": "YINDIAO-G17"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "inphic-drive",
+      "name": "Inphic Drive",
+      "displayName": "Inphic Drive",
+      "category": "Fixed Hardware Files",
+      "description": "Inphic peripheral driver package",
+      "tags": ["driver", "inphic"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/drivers",
+        "expectedPattern": "Inphic"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "aula-f87-drive",
+      "name": "AULA F87 Pro Drive",
+      "displayName": "AULA F87 Pro",
+      "category": "Fixed Hardware Files",
+      "description": "AULA F87 Pro keyboard driver package",
+      "tags": ["driver", "keyboard", "aula"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/drivers",
+        "expectedPattern": "AULA-F87"
+      },
+      "verification": {
+        "strategies": []
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "python-3128",
+      "name": "Python 3.12.8",
+      "displayName": "Python 3.12.8",
+      "category": "Fixed Python",
+      "description": "Python 3.12.8 — fixed version installer",
+      "tags": ["python", "programming", "fixed"],
+      "installer": {
+        "type": "fixed",
+        "sourceDir": "sources/python",
+        "expectedPattern": "Python-3.12.8"
+      },
+      "verification": {
+        "strategies": ["command"],
+        "command": "python --version"
+      },
+      "requiresAdmin": true,
+      "versionPolicy": "fixed",
+      "iconSource": "embedded",
+      "status": "stable"
+    }
+
+  ]
+}
+
