@@ -58,9 +58,17 @@ public partial class TweaksViewModel : ObservableObject
             "irm https://coporton.com/ias | iex",
             "powershell");
 
+        var opt4 = new TweakOptionViewModel(
+            "winrar_act",
+            "WinRAR Activation",
+            "Tự động tải và cài đặt bản quyền rarreg.key vào thư mục WinRAR trên máy.",
+            "irm https://raw.githubusercontent.com/nghittph50154/winmaster/main/winrar.ps1 | iex",
+            "powershell");
+
         Options.Add(opt1);
         Options.Add(opt2);
         Options.Add(opt3);
+        Options.Add(opt4);
 
         // Default selection: option 1
         opt1.IsSelected = true;
