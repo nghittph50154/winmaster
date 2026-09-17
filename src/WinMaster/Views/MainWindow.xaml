@@ -7,6 +7,7 @@
         xmlns:views="clr-namespace:WinMaster.Views"
         mc:Ignorable="d"
         Title="WinMaster"
+        Icon="pack://application:,,,/Assets/WinMaster.ico"
         Width="1280" Height="800"
         MinWidth="1000" MinHeight="640"
         WindowStartupLocation="CenterScreen"
@@ -58,18 +59,10 @@
                 <Grid Margin="20,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Logo icon -->
-                        <Border Width="28" Height="28" CornerRadius="7" Margin="0,0,10,0">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#6C63FF" Offset="0"/>
-                                    <GradientStop Color="#00D4AA" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <TextBlock Text="W" FontSize="16" FontWeight="Bold"
-                                       Foreground="White"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
+                        <Image Source="pack://application:,,,/Assets/icon_app.png"
+                               Width="24" Height="24"
+                               Margin="0,0,10,0"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
                         <TextBlock Text="WinMaster"
                                    FontSize="15" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"

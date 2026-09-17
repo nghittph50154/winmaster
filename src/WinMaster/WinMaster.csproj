@@ -42,6 +42,8 @@
 
   <!-- App assets and icons -->
   <ItemGroup>
+    <Resource Include="Assets\WinMaster.ico" />
+    <Resource Include="Assets\icon_app.png" />
     <None Include="Assets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
