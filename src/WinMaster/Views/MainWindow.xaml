@@ -55,7 +55,7 @@
                 <Grid Margin="20,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Logo icon -->
-                        <Border Width="28" Height="28" CornerRadius="7">
+                        <Border Width="28" Height="28" CornerRadius="7" Margin="0,0,10,0">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                     <GradientStop Color="#6C63FF" Offset="0"/>
@@ -70,9 +70,11 @@
                         <TextBlock Text="WinMaster"
                                    FontSize="15" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                   VerticalAlignment="Center"/>
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
                         <Border Background="{StaticResource SurfaceElevatedBrush}"
-                                CornerRadius="4" Padding="6,2">
+                                CornerRadius="4" Padding="6,2"
+                                VerticalAlignment="Center">
                             <TextBlock Text="{Binding AppVersion}"
                                        FontSize="11"
                                        Foreground="{StaticResource TextMutedBrush}"/>

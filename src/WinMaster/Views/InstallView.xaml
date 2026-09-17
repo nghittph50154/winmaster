@@ -58,25 +58,15 @@
                                     Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
                                     <!-- Category header -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                        <Border Width="3" Height="14" CornerRadius="2"
-                                                Background="{StaticResource AccentPrimaryBrush}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,16">
+                                        <Border Width="4" Height="18" CornerRadius="2"
+                                                Background="{StaticResource AccentPrimaryBrush}"
+                                                Margin="0,0,10,0"/>
                                         <TextBlock Text="{Binding Name}"
-                                                   FontSize="11"
+                                                   FontSize="14"
                                                    FontWeight="Bold"
-                                                   Foreground="{StaticResource TextMutedBrush}"
-                                                   VerticalAlignment="Center">
-                                            <TextBlock.RenderTransform>
-                                                <TranslateTransform/>
-                                            </TextBlock.RenderTransform>
-                                        </TextBlock>
-                                        <!-- App count badge -->
-                                        <Border Background="{StaticResource SurfaceElevatedBrush}"
-                                                CornerRadius="8" Padding="7,2">
-                                            <TextBlock Text="{Binding Apps.Count}"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource TextMutedBrush}"/>
-                                        </Border>
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <!-- App cards grid -->
@@ -91,8 +81,8 @@
                                                 <Border Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}">
                                                     <!-- APPLICATION CARD -->
                                                     <Border x:Name="card"
-                                                            Width="128" Height="148"
-                                                            Margin="0,0,12,12"
+                                                            Width="138" Height="152"
+                                                            Margin="0,0,16,16"
                                                             CornerRadius="12"
                                                             Cursor="Hand"
                                                             BorderThickness="1.5"
@@ -125,10 +115,10 @@
                                                             <!-- Card content -->
                                                             <StackPanel VerticalAlignment="Center"
                                                                         HorizontalAlignment="Center"
-                                                                        Margin="10,16,10,10">
+                                                                        Margin="12,14,12,10">
 
                                                                 <!-- App icon (emoji/text fallback) -->
-                                                                <Border Width="52" Height="52"
+                                                                <Border Width="48" Height="48"
                                                                         CornerRadius="12"
                                                                         Margin="0,0,0,10"
                                                                         HorizontalAlignment="Center">
@@ -138,10 +128,10 @@
                                                                             <GradientStop Color="#252545" Offset="1"/>
                                                                         </LinearGradientBrush>
                                                                     </Border.Background>
-                                                                    <!-- App icon emoji — swappable to Image in future -->
+                                                                    <!-- App icon emoji -->
                                                                     <TextBlock x:Name="appIcon"
                                                                                Text="{Binding IconEmoji}"
-                                                                               FontSize="28"
+                                                                               FontSize="26"
                                                                                HorizontalAlignment="Center"
                                                                                VerticalAlignment="Center"
                                                                                TextAlignment="Center"/>
@@ -154,8 +144,9 @@
                                                                            Foreground="{StaticResource TextPrimaryBrush}"
                                                                            TextAlignment="Center"
                                                                            TextWrapping="Wrap"
-                                                                           MaxWidth="108"
-                                                                           LineHeight="16"/>
+                                                                           MaxWidth="114"
+                                                                           LineHeight="16"
+                                                                           Padding="4,0"/>
 
                                                                 <!-- Status label -->
                                                                 <TextBlock Text="{Binding InstallStatus, Converter={StaticResource StatusToText}}"

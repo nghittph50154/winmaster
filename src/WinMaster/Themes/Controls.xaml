@@ -212,7 +212,7 @@
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="CaretBrush" Value="{StaticResource AccentPrimaryBrush}"/>
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Padding" Value="44,12,16,12"/>
+        <Setter Property="Padding" Value="40,0,16,0"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
         <Setter Property="Template">
@@ -229,7 +229,8 @@
                                        Foreground="{StaticResource TextMutedBrush}"
                                        FontSize="14"
                                        VerticalAlignment="Center"
-                                       Margin="44,0,16,0"
+                                       Margin="40,0,16,0"
+                                       Visibility="Collapsed"
                                        IsHitTestVisible="False"/>
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"
@@ -243,9 +244,6 @@
                         <Trigger Property="Text" Value="">
                             <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
                         </Trigger>
-                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="">
-                            <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
