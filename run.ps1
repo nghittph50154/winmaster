@@ -11,19 +11,42 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 Write-Host "=== WinMaster Launcher ===" -ForegroundColor Cyan
 
 # Check and auto-install winget if missing
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Host "Winget package manager not found. Installing Winget..." -ForegroundColor Yellow
+$wingetAvailable = (Get-Command winget -ErrorAction SilentlyContinue) -ne $null
+if (-not $wingetAvailable) {
+    Write-Host "Winget not found. Installing Winget automatically..." -ForegroundColor Yellow
     try {
+        # Download VCLibs dependency
+        $vcLibsUrl = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+        $vcLibsPath = "$env:TEMP\VCLibs.appx"
+        Invoke-WebRequest -Uri $vcLibsUrl -OutFile $vcLibsPath -UseBasicParsing -ErrorAction SilentlyContinue
+        if (Test-Path $vcLibsPath) { Add-AppxPackage -Path $vcLibsPath -ErrorAction SilentlyContinue }
+
+        # Download and install winget
         $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
         $wingetInstaller = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
-        
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetInstaller -UseBasicParsing
-        
         Add-AppxPackage -Path $wingetInstaller -ErrorAction SilentlyContinue
-        Write-Host "Winget installation command completed." -ForegroundColor Green
+
+        # Refresh PATH to pick up newly installed winget
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+
+        # Also try direct path to winget.exe
+        $wingetExe = "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe"
+        if (Test-Path $wingetExe) {
+            $env:PATH = "$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps"
+            $wingetAvailable = $true
+            Write-Host "Winget installed successfully!" -ForegroundColor Green
+        } else {
+            Write-Host "Winget was installed. Please re-run this script for it to take effect." -ForegroundColor Yellow
+            # Delete cached WinMaster so it re-downloads fresh version next run
+            $oldExe = "$env:LOCALAPPDATA\WinMaster\App\WinMaster.exe"
+            if (Test-Path $oldExe) { Remove-Item $oldExe -Force -ErrorAction SilentlyContinue }
+            pause
+            exit
+        }
     } catch {
-        Write-Host "Could not auto-install Winget." -ForegroundColor Red
+        Write-Host "Could not auto-install Winget: $_" -ForegroundColor Red
     }
 }
 
