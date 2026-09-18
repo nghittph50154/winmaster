@@ -119,10 +119,13 @@ public class PowerShellRunner
             var windowsApps = Path.Combine(programFiles, "WindowsApps");
             if (Directory.Exists(windowsApps))
             {
-                var candidates = Directory.GetFiles(windowsApps, "winget.exe", SearchOption.AllDirectories);
-                var best = candidates.OrderByDescending(f => f).FirstOrDefault();
-                if (best != null && File.Exists(best))
-                    return best;
+                var appDirs = Directory.GetDirectories(windowsApps, "Microsoft.DesktopAppInstaller_*");
+                foreach (var dir in appDirs.OrderByDescending(d => d))
+                {
+                    var target = Path.Combine(dir, "winget.exe");
+                    if (File.Exists(target))
+                        return target;
+                }
             }
         }
         catch { }

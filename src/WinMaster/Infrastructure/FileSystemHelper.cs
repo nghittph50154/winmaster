@@ -126,6 +126,26 @@ public static class FileSystemHelper
         }
         catch { }
     }
+
+    /// <summary>
+    /// Creates a Windows .lnk shortcut file.
+    /// </summary>
+    public static void CreateShortcut(string shortcutPath, string targetPath, string? iconPath = null)
+    {
+        try
+        {
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType == null) return;
+            dynamic shell = Activator.CreateInstance(shellType)!;
+            dynamic shortcut = shell.CreateShortcut(shortcutPath);
+            shortcut.TargetPath = targetPath;
+            shortcut.WorkingDirectory = Path.GetDirectoryName(targetPath) ?? "";
+            if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
+                shortcut.IconLocation = iconPath;
+            shortcut.Save();
+        }
+        catch { }
+    }
 }
 
 /// <summary>

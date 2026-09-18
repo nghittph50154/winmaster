@@ -259,26 +259,58 @@ public class DirectInstaller : IInstaller
 
                     ZipFile.ExtractToDirectory(filePath, extractDir, overwriteFiles: true);
 
-                    // Scan for setup or installer exe
                     var exeFiles = Directory.GetFiles(extractDir, "*.exe", SearchOption.AllDirectories);
-                    if (exeFiles.Length > 0)
-                    {
-                        var setupExe = exeFiles.FirstOrDefault(f =>
-                            f.Contains("setup", StringComparison.OrdinalIgnoreCase) ||
-                            f.Contains("install", StringComparison.OrdinalIgnoreCase))
-                            ?? exeFiles[0];
 
+                    // 1. Look for genuine setup / installer executable
+                    var setupExe = exeFiles.FirstOrDefault(f =>
+                    {
+                        var name = Path.GetFileNameWithoutExtension(f).ToLowerInvariant();
+                        return name is "setup" or "installer" or "install"
+                            || name.EndsWith("_setup") || name.EndsWith("-setup")
+                            || name.EndsWith("_install") || name.EndsWith("-installer");
+                    });
+
+                    if (setupExe != null)
+                    {
                         outputProgress?.Report($"Found installer: {Path.GetFileName(setupExe)}. Starting installation...");
                         FileSystemHelper.UnblockFile(setupExe);
                         return await RunExecutableProcess(setupExe, app, result, isInteractive, outputProgress, cancellationToken);
                     }
-                    else
+
+                    // 2. Look for main application executable (portable app like CapCut)
+                    var mainAppExe = exeFiles.FirstOrDefault(f =>
                     {
-                        outputProgress?.Report($"Archive extracted to: {extractDir}");
+                        var name = Path.GetFileNameWithoutExtension(f);
+                        return name.Equals("CapCut", StringComparison.OrdinalIgnoreCase)
+                            || name.Equals(app.DisplayName.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)
+                            || name.Equals(app.Id.Replace("-", ""), StringComparison.OrdinalIgnoreCase);
+                    });
+
+                    if (mainAppExe != null)
+                    {
+                        outputProgress?.Report($"Portable application ready: {Path.GetFileName(mainAppExe)}");
+                        FileSystemHelper.UnblockFile(mainAppExe);
+
+                        // Create Desktop shortcut
+                        try
+                        {
+                            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                            var shortcutPath = Path.Combine(desktop, $"{app.DisplayName}.lnk");
+                            FileSystemHelper.CreateShortcut(shortcutPath, mainAppExe);
+                            outputProgress?.Report($"Created Desktop shortcut: {app.DisplayName}");
+                        }
+                        catch { }
+
                         result.Status = InstallStatus.Success;
-                        result.VerificationDetail = $"Extracted to: {extractDir}";
+                        result.VerificationDetail = $"Extracted to {extractDir} (Main app: {Path.GetFileName(mainAppExe)})";
                         return result;
                     }
+
+                    // 3. Extracted successfully without runnable setup
+                    outputProgress?.Report($"Archive extracted to: {extractDir}");
+                    result.Status = InstallStatus.Success;
+                    result.VerificationDetail = $"Extracted to: {extractDir}";
+                    return result;
                 }
                 catch (Exception ex)
                 {
