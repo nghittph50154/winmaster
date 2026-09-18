@@ -74,7 +74,18 @@ public class PowerShellRunner
         CancellationToken cancellationToken = default,
         IProgress<string>? outputProgress = null)
     {
-        return await ExecuteAsync("winget", wingetArgs, cancellationToken, outputProgress);
+        // Check if winget command is available on system
+        try
+        {
+            return await ExecuteAsync("winget", wingetArgs, cancellationToken, outputProgress);
+        }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 2)
+        {
+            return PowerShellResult.Failure(
+                "Windows Package Manager (winget) chưa được cài đặt trên bản Windows Lite này. " +
+                "Vui lòng chọn ứng dụng loại 'fixed' hoặc cài winget (App Installer) từ Microsoft Store.",
+                -1);
+        }
     }
 
     private static async Task<PowerShellResult> ExecuteAsync(
