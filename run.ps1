@@ -10,44 +10,91 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 Write-Host "=== WinMaster Launcher ===" -ForegroundColor Cyan
 
-# Check and auto-install winget if missing
-$wingetAvailable = (Get-Command winget -ErrorAction SilentlyContinue) -ne $null
-if (-not $wingetAvailable) {
-    Write-Host "Winget not found. Installing Winget automatically..." -ForegroundColor Yellow
+# Function to test if winget is truly executable and functional
+function Test-WingetFunctional {
     try {
-        # Download VCLibs dependency
-        $vcLibsUrl = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
-        $vcLibsPath = "$env:TEMP\VCLibs.appx"
-        Invoke-WebRequest -Uri $vcLibsUrl -OutFile $vcLibsPath -UseBasicParsing -ErrorAction SilentlyContinue
-        if (Test-Path $vcLibsPath) { Add-AppxPackage -Path $vcLibsPath -ErrorAction SilentlyContinue }
+        $p = Start-Process -FilePath "winget" -ArgumentList "--version" -NoNewWindow -PassThru -Wait -ErrorAction Stop
+        if ($p.ExitCode -eq 0) { return $true }
+    } catch {}
 
-        # Download and install winget
-        $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-        $wingetInstaller = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetInstaller -UseBasicParsing
-        Add-AppxPackage -Path $wingetInstaller -ErrorAction SilentlyContinue
-
-        # Refresh PATH to pick up newly installed winget
-        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
-
-        # Also try direct path to winget.exe
-        $wingetExe = "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe"
-        if (Test-Path $wingetExe) {
-            $env:PATH = "$env:PATH;$env:LOCALAPPDATA\Microsoft\WindowsApps"
-            $wingetAvailable = $true
-            Write-Host "Winget installed successfully!" -ForegroundColor Green
-        } else {
-            Write-Host "Winget was installed. Please re-run this script for it to take effect." -ForegroundColor Yellow
-            # Delete cached WinMaster so it re-downloads fresh version next run
-            $oldExe = "$env:LOCALAPPDATA\WinMaster\App\WinMaster.exe"
-            if (Test-Path $oldExe) { Remove-Item $oldExe -Force -ErrorAction SilentlyContinue }
-            pause
-            exit
+    # Check direct executable in WindowsApps folder
+    try {
+        $candidate = Get-ChildItem -Path "C:\Program Files\WindowsApps" -Filter "winget.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($candidate) {
+            $p = Start-Process -FilePath $candidate.FullName -ArgumentList "--version" -NoNewWindow -PassThru -Wait -ErrorAction Stop
+            if ($p.ExitCode -eq 0) {
+                $dir = Split-Path -Parent $candidate.FullName
+                $env:PATH = "$dir;$env:PATH"
+                return $true
+            }
         }
-    } catch {
-        Write-Host "Could not auto-install Winget: $_" -ForegroundColor Red
+    } catch {}
+
+    return $false
+}
+
+# Check and install winget if missing or broken before launching WinMaster
+Write-Host ">>> Kiểm tra Windows Package Manager (Winget)..." -ForegroundColor Cyan
+if (-not (Test-WingetFunctional)) {
+    Write-Host "Winget chưa sẵn sàng hoặc bị lỗi. Đang tiến hành cài đặt Winget trước khi mở menu..." -ForegroundColor Yellow
+
+    # Try registering existing provisioned package first (fastest)
+    try {
+        Get-AppxPackage -AllUsers *DesktopAppInstaller* -ErrorAction SilentlyContinue | ForEach-Object {
+            Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppxManifest.xml" -ErrorAction SilentlyContinue
+        }
+    } catch {}
+
+    # If still not functional, download and install dependencies + DesktopAppInstaller
+    if (-not (Test-WingetFunctional)) {
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+
+            # 1. Download & Install VCLibs
+            Write-Host "  [1/3] Đang tải Microsoft VCLibs x64..." -ForegroundColor Gray
+            $vcLibsUrl = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+            $vcLibsPath = "$env:TEMP\Microsoft.VCLibs.x64.appx"
+            Invoke-WebRequest -Uri $vcLibsUrl -OutFile $vcLibsPath -UseBasicParsing -ErrorAction SilentlyContinue
+            if (Test-Path $vcLibsPath) {
+                Add-AppxPackage -Path $vcLibsPath -ErrorAction SilentlyContinue
+            }
+
+            # 2. Download & Install UI.Xaml 2.8
+            Write-Host "  [2/3] Đang tải Microsoft UI Xaml 2.8..." -ForegroundColor Gray
+            $uiXamlUrl = "https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx"
+            $uiXamlPath = "$env:TEMP\Microsoft.UI.Xaml.2.8.x64.appx"
+            Invoke-WebRequest -Uri $uiXamlUrl -OutFile $uiXamlPath -UseBasicParsing -ErrorAction SilentlyContinue
+            if (Test-Path $uiXamlPath) {
+                Add-AppxPackage -Path $uiXamlPath -ErrorAction SilentlyContinue
+            }
+
+            # 3. Download & Install DesktopAppInstaller (Winget)
+            Write-Host "  [3/3] Đang tải Microsoft DesktopAppInstaller (Winget)..." -ForegroundColor Gray
+            $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+            $wingetInstaller = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
+            Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetInstaller -UseBasicParsing
+            if (Test-Path $wingetInstaller) {
+                Add-AppxPackage -Path $wingetInstaller -DependencyPath $vcLibsPath, $uiXamlPath -ErrorAction SilentlyContinue
+            }
+
+            # Refresh PATH
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User") + ";$env:LOCALAPPDATA\Microsoft\WindowsApps"
+
+            # Clean up temp installers
+            Remove-Item $vcLibsPath, $uiXamlPath, $wingetInstaller -Force -ErrorAction SilentlyContinue
+        } catch {
+            Write-Host "Lỗi trong quá trình cài đặt Winget: $_" -ForegroundColor Red
+        }
     }
+
+    # Re-check after installation
+    if (Test-WingetFunctional) {
+        Write-Host "✅ Cài đặt Winget thành công!" -ForegroundColor Green
+    } else {
+        Write-Host "⚠️ Chưa thể kích hoạt Winget tự động. WinMaster vẫn sẽ mở (bạn có thể dùng các app tải trực tiếp)." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "✅ Winget đã sẵn sàng trên hệ thống." -ForegroundColor Green
 }
 
 $workDir = "$env:LOCALAPPDATA\WinMaster"
@@ -56,7 +103,7 @@ $zipPath = "$workDir\WinMaster.zip"
 $extractPath = "$workDir\App"
 $versionFile = "$workDir\version.txt"
 $zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
-$EXPECTED_VERSION = "1.1.2"
+$EXPECTED_VERSION = "1.1.3"
 
 if (-not (Test-Path $workDir)) {
     New-Item -ItemType Directory -Path $workDir -Force | Out-Null
