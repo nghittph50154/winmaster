@@ -56,7 +56,7 @@ $zipPath = "$workDir\WinMaster.zip"
 $extractPath = "$workDir\App"
 $versionFile = "$workDir\version.txt"
 $zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
-$EXPECTED_VERSION = "1.1.1"
+$EXPECTED_VERSION = "1.1.2"
 
 if (-not (Test-Path $workDir)) {
     New-Item -ItemType Directory -Path $workDir -Force | Out-Null
