@@ -8,6 +8,25 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
+Write-Host "=== WinMaster Launcher ===" -ForegroundColor Cyan
+
+# Check and auto-install winget if missing
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Host "Winget package manager not found. Installing Winget..." -ForegroundColor Yellow
+    try {
+        $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+        $wingetInstaller = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
+        
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetInstaller -UseBasicParsing
+        
+        Add-AppxPackage -Path $wingetInstaller -ErrorAction SilentlyContinue
+        Write-Host "Winget installation command completed." -ForegroundColor Green
+    } catch {
+        Write-Host "Could not auto-install Winget." -ForegroundColor Red
+    }
+}
+
 $workDir = "$env:LOCALAPPDATA\WinMaster"
 $exePath = "$workDir\App\WinMaster.exe"
 $zipPath = "$workDir\WinMaster.zip"
@@ -22,7 +41,7 @@ if (Get-Command Add-MpPreference -ErrorAction SilentlyContinue) {
     Add-MpPreference -ExclusionPath $workDir -ErrorAction SilentlyContinue
 }
 
-# If WinMaster.exe exists, launch instantly! If -Update or missing, download fresh copy
+# If WinMaster.exe exists, launch instantly! If missing, download fresh copy
 if (Test-Path $exePath) {
     Write-Host "Launching WinMaster..." -ForegroundColor Cyan
     Start-Process -FilePath $exePath
