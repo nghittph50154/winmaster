@@ -146,6 +146,11 @@ public class PowerShellRunner
         {
             return PowerShellResult.Failure("Operation was cancelled.", -1);
         }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 2)
+        {
+            return PowerShellResult.Failure(
+                $"Công cụ '{executable}' không tồn tại hoặc chưa được cài đặt trên bản Windows này.", -1);
+        }
         catch (Exception ex)
         {
             return PowerShellResult.Failure($"Failed to execute: {ex.Message}", -1);
