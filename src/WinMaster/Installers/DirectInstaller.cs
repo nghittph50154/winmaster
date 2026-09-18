@@ -1,22 +1,20 @@
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using WinMaster.Infrastructure;
 using WinMaster.Models;
 
 namespace WinMaster.Installers;
 
 /// <summary>
-/// Installs applications by downloading directly from an official URL,
-/// then running the downloaded EXE or MSI.
+/// Installs applications by downloading directly from an official URL or Google Drive,
+/// handles zip auto-extraction, and executes the installer.
 /// </summary>
 public class DirectInstaller : IInstaller
 {
-    private static readonly HttpClient HttpClient = new()
-    {
-        Timeout = TimeSpan.FromMinutes(30),
-        DefaultRequestHeaders = { { "User-Agent", "WinMaster/1.0 (+https://github.com/winmaster)" } }
-    };
-
     public bool CanHandle(ApplicationEntry app)
         => app.Installer.InstallerTypeEnum == InstallerType.Direct;
 
@@ -47,25 +45,10 @@ public class DirectInstaller : IInstaller
         // Convert Google Drive share link to direct download URL
         url = ConvertGoogleDriveUrl(url);
 
-        // Determine filename from URL or app id
-        string fileName;
-        if (url.Contains("drive.google.com") || url.Contains("docs.google.com"))
-            fileName = $"{app.Id}-installer.exe";  // Drive links don't have filename in URL
-        else
-        {
-            var uri = new Uri(url);
-            fileName = Path.GetFileName(uri.LocalPath);
-            if (string.IsNullOrWhiteSpace(fileName))
-                fileName = $"{app.Id}-installer{Path.GetExtension(uri.LocalPath)}";
-        }
-
-        var downloadPath = FileSystemHelper.GetTempDownloadPath(fileName);
-        outputProgress?.Report($"Downloading {app.DisplayName}...");
-
+        string downloadedFilePath;
         try
         {
-            await DownloadFileAsync(url, downloadPath, cancellationToken);
-            outputProgress?.Report($"Download complete. Installing {app.DisplayName}...");
+            downloadedFilePath = await DownloadFileAsync(url, app, customInstallPath, outputProgress, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
@@ -84,9 +67,9 @@ public class DirectInstaller : IInstaller
             return result;
         }
 
-        // Determine file type and handle accordingly
-        var category = FileSystemHelper.GetFileCategory(downloadPath);
-        result = await RunInstallerFile(downloadPath, category, app, result, customInstallPath, isInteractive, outputProgress, cancellationToken);
+        // Determine file category and run installation/extraction
+        var category = FileSystemHelper.GetFileCategory(downloadedFilePath);
+        result = await RunInstallerFile(downloadedFilePath, category, app, result, customInstallPath, isInteractive, outputProgress, cancellationToken);
 
         sw.Stop();
         result.Duration = sw.Elapsed;
@@ -95,7 +78,7 @@ public class DirectInstaller : IInstaller
     }
 
     /// <summary>
-    /// Converts a Google Drive share/view link to a direct download link.
+    /// Converts a Google Drive share/view link to an export download link.
     /// Supports: /file/d/ID/view, /open?id=ID, /uc?id=ID formats.
     /// </summary>
     private static string ConvertGoogleDriveUrl(string url)
@@ -103,57 +86,148 @@ public class DirectInstaller : IInstaller
         if (!url.Contains("drive.google.com") && !url.Contains("docs.google.com"))
             return url;
 
-        // Extract file ID
         string? fileId = null;
 
-        // Format: /file/d/FILE_ID/view
-        var match = System.Text.RegularExpressions.Regex.Match(url, @"/file/d/([a-zA-Z0-9_-]+)");
+        var match = Regex.Match(url, @"/file/d/([a-zA-Z0-9_-]+)");
         if (match.Success) fileId = match.Groups[1].Value;
 
-        // Format: id=FILE_ID
         if (fileId is null)
         {
-            match = System.Text.RegularExpressions.Regex.Match(url, @"[?&]id=([a-zA-Z0-9_-]+)");
+            match = Regex.Match(url, @"[?&]id=([a-zA-Z0-9_-]+)");
             if (match.Success) fileId = match.Groups[1].Value;
         }
 
-        if (fileId is null) return url; // Can't parse, return as-is
+        if (fileId is null) return url;
 
-        return $"https://drive.google.com/uc?export=download&id={fileId}&confirm=t";
+        return $"https://drive.google.com/uc?export=download&id={fileId}";
     }
 
     /// <summary>
-    /// Downloads a file, handling Google Drive large-file confirmation if needed.
+    /// Downloads a file from direct URL or Google Drive (handling large-file confirmation).
+    /// Returns the full path to the downloaded file.
     /// </summary>
-    private static async Task DownloadFileAsync(string url, string destPath, CancellationToken cancellationToken)
+    private static async Task<string> DownloadFileAsync(
+        string url,
+        ApplicationEntry app,
+        string? customInstallPath,
+        IProgress<string>? outputProgress,
+        CancellationToken cancellationToken)
     {
-        using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        var handler = new HttpClientHandler
+        {
+            CookieContainer = new CookieContainer(),
+            AllowAutoRedirect = true
+        };
+
+        using var client = new HttpClient(handler)
+        {
+            Timeout = TimeSpan.FromHours(1)
+        };
+        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+        outputProgress?.Report($"Connecting to download source for {app.DisplayName}...");
+        var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var contentType = response.Content.Headers.ContentType?.MediaType ?? "";
+        HttpResponseMessage fileResponse = response;
+        string? resolvedFileName = null;
 
-        // Google Drive returns HTML for large-file confirmation — handle it
-        if (contentType.Contains("text/html"))
+        var mediaType = response.Content.Headers.ContentType?.MediaType ?? "";
+        if (mediaType.Contains("text/html"))
         {
             var html = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            // Extract confirm token (e.g. confirm=t&uuid=...)
-            var uuidMatch = System.Text.RegularExpressions.Regex.Match(html, @"uuid=([a-zA-Z0-9_-]+)");
-            var baseUrl = System.Text.RegularExpressions.Regex.Match(url, @"(https://drive\.google\.com/uc\?[^""]+)").Value;
+            // Extract file name from warning page: <span class="uc-name-size"><a ...>Filename</a>
+            var nameMatch = Regex.Match(html, @"<span class=""uc-name-size""><a [^>]+>([^<]+)</a>");
+            if (nameMatch.Success)
+                resolvedFileName = nameMatch.Groups[1].Value.Trim();
 
-            if (uuidMatch.Success && baseUrl.Length > 0)
+            // Extract form action and hidden inputs
+            var formMatch = Regex.Match(html, @"<form[^>]+id=""download-form""[^>]+action=""([^""]+)""");
+            if (!formMatch.Success)
+                formMatch = Regex.Match(html, @"<form[^>]+action=""([^""]+)""");
+
+            if (formMatch.Success)
             {
-                var confirmUrl = $"{baseUrl}&uuid={uuidMatch.Groups[1].Value}";
-                using var confirmResp = await HttpClient.GetAsync(confirmUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                confirmResp.EnsureSuccessStatusCode();
-                await using var fs2 = new FileStream(destPath, FileMode.Create, FileAccess.Write);
-                await confirmResp.Content.CopyToAsync(fs2, cancellationToken);
-                return;
+                var action = formMatch.Groups[1].Value;
+                var inputs = Regex.Matches(html, @"<input[^>]+type=""hidden""[^>]+name=""([^""]+)""[^>]+value=""([^""]*)""");
+                var query = new List<string>();
+                foreach (Match m in inputs)
+                {
+                    query.Add($"{Uri.EscapeDataString(m.Groups[1].Value)}={Uri.EscapeDataString(m.Groups[2].Value)}");
+                }
+                var confirmUrl = action + "?" + string.Join("&", query);
+                outputProgress?.Report($"Confirming download for {resolvedFileName ?? app.DisplayName}...");
+                fileResponse = await client.GetAsync(confirmUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                fileResponse.EnsureSuccessStatusCode();
             }
         }
 
-        await using var fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write);
-        await response.Content.CopyToAsync(fileStream, cancellationToken);
+        // Determine real filename from headers if available
+        if (fileResponse.Content.Headers.ContentDisposition?.FileName != null)
+        {
+            resolvedFileName = fileResponse.Content.Headers.ContentDisposition.FileName.Trim('"', ' ');
+        }
+
+        if (string.IsNullOrWhiteSpace(resolvedFileName))
+        {
+            if (url.Contains("drive.google.com") || url.Contains("docs.google.com"))
+            {
+                resolvedFileName = $"{app.Id}-installer.exe";
+            }
+            else
+            {
+                var uri = new Uri(url);
+                resolvedFileName = Path.GetFileName(uri.LocalPath);
+                if (string.IsNullOrWhiteSpace(resolvedFileName))
+                    resolvedFileName = $"{app.Id}-installer.exe";
+            }
+        }
+
+        var targetFolder = !string.IsNullOrWhiteSpace(customInstallPath) && Directory.Exists(customInstallPath)
+            ? customInstallPath
+            : FileSystemHelper.GetDownloadsFolder();
+
+        var downloadPath = Path.Combine(targetFolder, resolvedFileName);
+
+        var totalBytes = fileResponse.Content.Headers.ContentLength;
+        var totalMB = totalBytes.HasValue ? totalBytes.Value / (1024.0 * 1024.0) : 0;
+
+        outputProgress?.Report($"Downloading {resolvedFileName} ({(totalMB > 0 ? $"{totalMB:F1} MB" : "size unknown")})...");
+
+        await using (var contentStream = await fileResponse.Content.ReadAsStreamAsync(cancellationToken))
+        await using (var fileStream = new FileStream(downloadPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+        {
+            var buffer = new byte[81920];
+            long totalRead = 0;
+            int bytesRead;
+            var lastReport = DateTime.UtcNow;
+
+            while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                totalRead += bytesRead;
+
+                if ((DateTime.UtcNow - lastReport).TotalMilliseconds >= 1500)
+                {
+                    lastReport = DateTime.UtcNow;
+                    var readMB = totalRead / (1024.0 * 1024.0);
+                    if (totalBytes.HasValue && totalBytes.Value > 0)
+                    {
+                        var percent = (int)(totalRead * 100 / totalBytes.Value);
+                        outputProgress?.Report($"Downloading {resolvedFileName}: {readMB:F1} MB / {totalMB:F1} MB ({percent}%)...");
+                    }
+                    else
+                    {
+                        outputProgress?.Report($"Downloading {resolvedFileName}: {readMB:F1} MB...");
+                    }
+                }
+            }
+        }
+
+        FileSystemHelper.UnblockFile(downloadPath);
+        outputProgress?.Report($"Download complete: {resolvedFileName}");
+        return downloadPath;
     }
 
     internal static async Task<InstallResult> RunInstallerFile(
@@ -166,26 +240,73 @@ public class DirectInstaller : IInstaller
         IProgress<string>? outputProgress,
         CancellationToken cancellationToken)
     {
+        var targetFolder = !string.IsNullOrWhiteSpace(customInstallPath) && Directory.Exists(customInstallPath)
+            ? customInstallPath
+            : FileSystemHelper.GetDownloadsFolder();
+
         if (category == FileCategory.Archive)
         {
-            var targetFolder = !string.IsNullOrWhiteSpace(customInstallPath) && Directory.Exists(customInstallPath)
-                ? customInstallPath
-                : FileSystemHelper.GetDownloadsFolder();
+            // If it is a ZIP archive, extract it and check for an installer executable
+            if (Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var extractDir = Path.Combine(targetFolder, Path.GetFileNameWithoutExtension(filePath));
+                    outputProgress?.Report($"Extracting archive to: {extractDir}...");
 
-            var destPath = Path.Combine(targetFolder, Path.GetFileName(filePath));
-            if (filePath != destPath && File.Exists(filePath))
-                File.Move(filePath, destPath, overwrite: true);
+                    if (Directory.Exists(extractDir))
+                        Directory.Delete(extractDir, true);
 
-            outputProgress?.Report($"Download completed.");
-            outputProgress?.Report($"File saved to: {destPath}");
-            outputProgress?.Report($"Please extract and install manually.");
+                    ZipFile.ExtractToDirectory(filePath, extractDir, overwriteFiles: true);
 
+                    // Scan for setup or installer exe
+                    var exeFiles = Directory.GetFiles(extractDir, "*.exe", SearchOption.AllDirectories);
+                    if (exeFiles.Length > 0)
+                    {
+                        var setupExe = exeFiles.FirstOrDefault(f =>
+                            f.Contains("setup", StringComparison.OrdinalIgnoreCase) ||
+                            f.Contains("install", StringComparison.OrdinalIgnoreCase))
+                            ?? exeFiles[0];
+
+                        outputProgress?.Report($"Found installer: {Path.GetFileName(setupExe)}. Starting installation...");
+                        FileSystemHelper.UnblockFile(setupExe);
+                        return await RunExecutableProcess(setupExe, app, result, isInteractive, outputProgress, cancellationToken);
+                    }
+                    else
+                    {
+                        outputProgress?.Report($"Archive extracted to: {extractDir}");
+                        result.Status = InstallStatus.Success;
+                        result.VerificationDetail = $"Extracted to: {extractDir}";
+                        return result;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    outputProgress?.Report($"Auto-extract note: {ex.Message}. Archive kept at: {filePath}");
+                }
+            }
+
+            outputProgress?.Report($"Archive saved to: {filePath}");
+            outputProgress?.Report($"Please extract and install manually if needed.");
             result.Status = InstallStatus.Success;
-            result.VerificationDetail = $"Archive downloaded to: {destPath}";
+            result.VerificationDetail = $"Archive saved to: {filePath}";
             return result;
         }
 
-        // EXE or MSI — run with or without GUI window based on isInteractive
+        // Executable (.exe) or MSI (.msi)
+        return await RunExecutableProcess(filePath, app, result, isInteractive, outputProgress, cancellationToken);
+    }
+
+    private static async Task<InstallResult> RunExecutableProcess(
+        string filePath,
+        ApplicationEntry app,
+        InstallResult result,
+        bool isInteractive,
+        IProgress<string>? outputProgress,
+        CancellationToken cancellationToken)
+    {
+        FileSystemHelper.UnblockFile(filePath);
+        var category = FileSystemHelper.GetFileCategory(filePath);
         var executable = category == FileCategory.Installer ? "msiexec.exe" : filePath;
         var arguments = "";
 
@@ -204,10 +325,15 @@ public class DirectInstaller : IInstaller
 
         try
         {
+            var workingDir = Path.GetDirectoryName(filePath);
+            if (string.IsNullOrWhiteSpace(workingDir) || !Directory.Exists(workingDir))
+                workingDir = AppDomain.CurrentDomain.BaseDirectory;
+
             var psi = new ProcessStartInfo
             {
                 FileName = executable,
                 Arguments = arguments,
+                WorkingDirectory = workingDir,
                 UseShellExecute = isInteractive,
                 CreateNoWindow = !isInteractive
             };
@@ -223,7 +349,7 @@ public class DirectInstaller : IInstaller
             await process.WaitForExitAsync(cancellationToken);
             result.ExitCode = process.ExitCode;
 
-            // Exit code 0 or 3010 (restart required) are success
+            // Exit code 0 or 3010 (restart required) indicate success
             result.Status = (process.ExitCode == 0 || process.ExitCode == 3010)
                 ? InstallStatus.Installing
                 : InstallStatus.Failed;

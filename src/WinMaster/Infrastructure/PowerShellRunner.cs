@@ -74,18 +74,69 @@ public class PowerShellRunner
         CancellationToken cancellationToken = default,
         IProgress<string>? outputProgress = null)
     {
-        // Check if winget command is available on system
+        // 1. Try direct path to winget.exe (bypasses AppExecutionAlias error 1920)
+        var directWinget = FindWingetExecutable();
+        if (!string.IsNullOrEmpty(directWinget))
+        {
+            try
+            {
+                var directResult = await ExecuteAsync(directWinget, wingetArgs, cancellationToken, outputProgress);
+                if (directResult.IsSuccess || directResult.ExitCode == 0 || directResult.ExitCode == unchecked((int)0x8A15002B))
+                    return directResult;
+            }
+            catch { }
+        }
+
+        // 2. Try standard "winget" process
         try
         {
-            return await ExecuteAsync("winget", wingetArgs, cancellationToken, outputProgress);
+            var res = await ExecuteAsync("winget", wingetArgs, cancellationToken, outputProgress);
+            if (res.IsSuccess || res.ExitCode == 0 || res.ExitCode == unchecked((int)0x8A15002B))
+                return res;
         }
-        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 2)
+        catch { }
+
+        // 3. Fallback: run via PowerShell command (handles environment and execution aliases properly)
+        try
         {
-            return PowerShellResult.Failure(
-                "Windows Package Manager (winget) chưa được cài đặt trên bản Windows Lite này. " +
-                "Vui lòng chọn ứng dụng loại 'fixed' hoặc cài winget (App Installer) từ Microsoft Store.",
-                -1);
+            var psRes = await RunCommandAsync($"winget {wingetArgs}", cancellationToken, outputProgress);
+            if (psRes.IsSuccess || psRes.ExitCode == 0 || psRes.ExitCode == unchecked((int)0x8A15002B))
+                return psRes;
         }
+        catch { }
+
+        return PowerShellResult.Failure(
+            "Windows Package Manager (winget) chưa sẵn sàng hoặc không thể truy cập trên bản Windows này. " +
+            "Vui lòng kiểm tra lại winget hoặc chọn ứng dụng tải trực tiếp.",
+            -1);
+    }
+
+    private static string? FindWingetExecutable()
+    {
+        try
+        {
+            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            var windowsApps = Path.Combine(programFiles, "WindowsApps");
+            if (Directory.Exists(windowsApps))
+            {
+                var candidates = Directory.GetFiles(windowsApps, "winget.exe", SearchOption.AllDirectories);
+                var best = candidates.OrderByDescending(f => f).FirstOrDefault();
+                if (best != null && File.Exists(best))
+                    return best;
+            }
+        }
+        catch { }
+
+        try
+        {
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var aliasPath = Path.Combine(localAppData, @"Microsoft\WindowsApps\winget.exe");
+            if (File.Exists(aliasPath))
+                return aliasPath;
+        }
+        catch { }
+
+        return null;
     }
 
     private static async Task<PowerShellResult> ExecuteAsync(
@@ -101,6 +152,7 @@ public class PowerShellRunner
         {
             FileName = executable,
             Arguments = arguments,
+            WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

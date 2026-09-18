@@ -107,6 +107,25 @@ public static class FileSystemHelper
     /// </summary>
     public static string GetTempDownloadPath(string fileName)
         => Path.Combine(GetDownloadsFolder(), fileName);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool DeleteFile(string name);
+
+    /// <summary>
+    /// Removes the Zone.Identifier alternate data stream so Windows doesn't block downloaded executables.
+    /// </summary>
+    public static void UnblockFile(string filePath)
+    {
+        try
+        {
+            if (File.Exists(filePath))
+            {
+                DeleteFile(filePath + ":Zone.Identifier");
+            }
+        }
+        catch { }
+    }
 }
 
 /// <summary>
