@@ -44,24 +44,27 @@ public class DirectInstaller : IInstaller
             return result;
         }
 
-        // Determine filename from URL
-        var uri = new Uri(url);
-        var fileName = Path.GetFileName(uri.LocalPath);
-        if (string.IsNullOrWhiteSpace(fileName))
-            fileName = $"{app.Id}-installer{Path.GetExtension(uri.LocalPath)}";
+        // Convert Google Drive share link to direct download URL
+        url = ConvertGoogleDriveUrl(url);
+
+        // Determine filename from URL or app id
+        string fileName;
+        if (url.Contains("drive.google.com") || url.Contains("docs.google.com"))
+            fileName = $"{app.Id}-installer.exe";  // Drive links don't have filename in URL
+        else
+        {
+            var uri = new Uri(url);
+            fileName = Path.GetFileName(uri.LocalPath);
+            if (string.IsNullOrWhiteSpace(fileName))
+                fileName = $"{app.Id}-installer{Path.GetExtension(uri.LocalPath)}";
+        }
 
         var downloadPath = FileSystemHelper.GetTempDownloadPath(fileName);
         outputProgress?.Report($"Downloading {app.DisplayName}...");
 
         try
         {
-            // Download the file
-            using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            await using var fileStream = new FileStream(downloadPath, FileMode.Create, FileAccess.Write);
-            await response.Content.CopyToAsync(fileStream, cancellationToken);
-
+            await DownloadFileAsync(url, downloadPath, cancellationToken);
             outputProgress?.Report($"Download complete. Installing {app.DisplayName}...");
         }
         catch (HttpRequestException ex)
@@ -89,6 +92,68 @@ public class DirectInstaller : IInstaller
         result.Duration = sw.Elapsed;
         result.CompletedAt = DateTime.Now;
         return result;
+    }
+
+    /// <summary>
+    /// Converts a Google Drive share/view link to a direct download link.
+    /// Supports: /file/d/ID/view, /open?id=ID, /uc?id=ID formats.
+    /// </summary>
+    private static string ConvertGoogleDriveUrl(string url)
+    {
+        if (!url.Contains("drive.google.com") && !url.Contains("docs.google.com"))
+            return url;
+
+        // Extract file ID
+        string? fileId = null;
+
+        // Format: /file/d/FILE_ID/view
+        var match = System.Text.RegularExpressions.Regex.Match(url, @"/file/d/([a-zA-Z0-9_-]+)");
+        if (match.Success) fileId = match.Groups[1].Value;
+
+        // Format: id=FILE_ID
+        if (fileId is null)
+        {
+            match = System.Text.RegularExpressions.Regex.Match(url, @"[?&]id=([a-zA-Z0-9_-]+)");
+            if (match.Success) fileId = match.Groups[1].Value;
+        }
+
+        if (fileId is null) return url; // Can't parse, return as-is
+
+        return $"https://drive.google.com/uc?export=download&id={fileId}&confirm=t";
+    }
+
+    /// <summary>
+    /// Downloads a file, handling Google Drive large-file confirmation if needed.
+    /// </summary>
+    private static async Task DownloadFileAsync(string url, string destPath, CancellationToken cancellationToken)
+    {
+        using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var contentType = response.Content.Headers.ContentType?.MediaType ?? "";
+
+        // Google Drive returns HTML for large-file confirmation — handle it
+        if (contentType.Contains("text/html"))
+        {
+            var html = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            // Extract confirm token (e.g. confirm=t&uuid=...)
+            var uuidMatch = System.Text.RegularExpressions.Regex.Match(html, @"uuid=([a-zA-Z0-9_-]+)");
+            var baseUrl = System.Text.RegularExpressions.Regex.Match(url, @"(https://drive\.google\.com/uc\?[^""]+)").Value;
+
+            if (uuidMatch.Success && baseUrl.Length > 0)
+            {
+                var confirmUrl = $"{baseUrl}&uuid={uuidMatch.Groups[1].Value}";
+                using var confirmResp = await HttpClient.GetAsync(confirmUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                confirmResp.EnsureSuccessStatusCode();
+                await using var fs2 = new FileStream(destPath, FileMode.Create, FileAccess.Write);
+                await confirmResp.Content.CopyToAsync(fs2, cancellationToken);
+                return;
+            }
+        }
+
+        await using var fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write);
+        await response.Content.CopyToAsync(fileStream, cancellationToken);
     }
 
     internal static async Task<InstallResult> RunInstallerFile(

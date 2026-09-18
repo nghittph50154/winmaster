@@ -1107,9 +1107,8 @@
       "description": "CapCut video editor — fixed version 1.5",
       "tags": ["video", "editor", "capcut", "fixed"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/capcut",
-        "expectedPattern": "CapCut-1.5"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1GxdxE86idOsxNDWQqWuJYYKxKEbXS1gG/view"
       },
       "verification": {
         "strategies": []
@@ -1128,9 +1127,8 @@
       "description": "CapCut video editor — fixed version 7.0",
       "tags": ["video", "editor", "capcut", "fixed"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/capcut",
-        "expectedPattern": "CapCut-7.0"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1XtDCPZQr_RknKGs_x6PGckIq3JjMOMTN/view"
       },
       "verification": {
         "strategies": []
@@ -1149,9 +1147,8 @@
       "description": "CapCut video editor — fixed version 7.7",
       "tags": ["video", "editor", "capcut", "fixed"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/capcut",
-        "expectedPattern": "CapCut-7.7"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1RxJRberzLu3IGvwdL6a1TqswAHSYbuw7/view"
       },
       "verification": {
         "strategies": []
@@ -1170,9 +1167,8 @@
       "description": "YINDIAO G17 keyboard driver package",
       "tags": ["driver", "keyboard", "yindiao"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/drivers",
-        "expectedPattern": "YINDIAO-G17"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1g6AJoZ5iV1947_Wpoi2bKaU1huHtcrXi/view"
       },
       "verification": {
         "strategies": []
@@ -1191,9 +1187,8 @@
       "description": "Inphic peripheral driver package",
       "tags": ["driver", "inphic"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/drivers",
-        "expectedPattern": "Inphic"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1MgUdRAtVkQjWA7Ah8WfljRLXOgqo2cyq/view"
       },
       "verification": {
         "strategies": []
@@ -1212,9 +1207,8 @@
       "description": "AULA F87 Pro keyboard driver package",
       "tags": ["driver", "keyboard", "aula"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/drivers",
-        "expectedPattern": "AULA-F87"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1wXuF3-C4-shEn3nRB2eWcn2oNy4lw1Au/view"
       },
       "verification": {
         "strategies": []
@@ -1233,9 +1227,8 @@
       "description": "Python 3.12.8 — fixed version installer",
       "tags": ["python", "programming", "fixed"],
       "installer": {
-        "type": "fixed",
-        "sourceDir": "sources/python",
-        "expectedPattern": "Python-3.12.8"
+        "type": "direct",
+        "directUrl": "https://drive.google.com/file/d/1XhY07m-GEvij5qWAgdqe-rCelCWVt1EF/view"
       },
       "verification": {
         "strategies": ["command"],
