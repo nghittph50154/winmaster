@@ -85,7 +85,8 @@ if ((Test-Path $exePath) -and (Test-Path $versionFile)) {
 }
 
 if (-not $needDownload) {
-    Start-Process -FilePath $exePath
+    Unblock-File -Path $exePath -ErrorAction SilentlyContinue
+    & "$exePath"
     exit
 }
 
@@ -97,9 +98,12 @@ Write-Host "Extracting WinMaster..." -ForegroundColor Green
 if (Test-Path $extractPath) { Remove-Item -Path $extractPath -Recurse -Force }
 Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 
+# Unblock all extracted files (remove internet Zone Identifier to allow execution)
+Get-ChildItem -Path $extractPath -Recurse | Unblock-File -ErrorAction SilentlyContinue
+
 # Save version file after successful download
 Set-Content -Path $versionFile -Value $EXPECTED_VERSION
 
 Write-Host "Launching WinMaster $EXPECTED_VERSION..." -ForegroundColor Cyan
-Start-Process -FilePath $exePath
+& "$exePath"
 
