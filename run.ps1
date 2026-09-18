@@ -10,8 +10,23 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 Write-Host "=== WinMaster Launcher ===" -ForegroundColor Cyan
 
+$workDir = "$env:LOCALAPPDATA\WinMaster"
+$standaloneWinget = "$workDir\winget\winget.exe"
+
 # Function to test if winget is truly executable and functional
 function Test-WingetFunctional {
+    # 0. Check WinMaster standalone extracted winget
+    if (Test-Path $standaloneWinget) {
+        try {
+            $p = Start-Process -FilePath $standaloneWinget -ArgumentList "--version" -NoNewWindow -PassThru -Wait -ErrorAction Stop
+            if ($p.ExitCode -eq 0) {
+                $dir = Split-Path -Parent $standaloneWinget
+                $env:PATH = "$dir;$env:PATH"
+                return $true
+            }
+        } catch {}
+    }
+
     # 1. Check direct executable in WindowsApps folder (fastest and bypasses alias restrictions)
     try {
         $dirs = Get-Item "C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*" -ErrorAction SilentlyContinue | Sort-Object FullName -Descending
@@ -39,66 +54,60 @@ function Test-WingetFunctional {
 # Check and install winget if missing or broken before launching WinMaster
 Write-Host ">>> Kiểm tra Windows Package Manager (Winget)..." -ForegroundColor Cyan
 if (-not (Test-WingetFunctional)) {
-    Write-Host "Winget chưa sẵn sàng hoặc bị lỗi. Đang tiến hành kích hoạt / cài đặt Winget..." -ForegroundColor Yellow
+    Write-Host "Winget chưa sẵn sàng. Đang tự động thiết lập Winget cho hệ thống..." -ForegroundColor Yellow
 
-    # Try registering existing provisioned package first (fastest)
+    # Try registering existing provisioned package first
     try {
         Get-AppxPackage -AllUsers *DesktopAppInstaller* -ErrorAction SilentlyContinue | ForEach-Object {
             Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppxManifest.xml" -ErrorAction SilentlyContinue
         }
     } catch {}
 
-    # If still not functional, download and install dependencies + DesktopAppInstaller
+    # If still not functional, download msixbundle and extract standalone winget
     if (-not (Test-WingetFunctional)) {
         try {
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
-            # 1. Download & Install VCLibs
-            Write-Host "  [1/3] Đang tải Microsoft VCLibs x64..." -ForegroundColor Gray
-            $vcLibsUrl = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
-            $vcLibsPath = "$env:TEMP\Microsoft.VCLibs.x64.appx"
-            Invoke-WebRequest -Uri $vcLibsUrl -OutFile $vcLibsPath -UseBasicParsing -ErrorAction SilentlyContinue
-            if (Test-Path $vcLibsPath) {
-                Add-AppxPackage -Path $vcLibsPath -ErrorAction SilentlyContinue
-            }
-
-            # 2. Download & Install UI.Xaml 2.8
-            Write-Host "  [2/3] Đang tải Microsoft UI Xaml 2.8..." -ForegroundColor Gray
-            $uiXamlUrl = "https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx"
-            $uiXamlPath = "$env:TEMP\Microsoft.UI.Xaml.2.8.x64.appx"
-            Invoke-WebRequest -Uri $uiXamlUrl -OutFile $uiXamlPath -UseBasicParsing -ErrorAction SilentlyContinue
-            if (Test-Path $uiXamlPath) {
-                Add-AppxPackage -Path $uiXamlPath -ErrorAction SilentlyContinue
-            }
-
-            # 3. Download & Install DesktopAppInstaller (Winget)
-            Write-Host "  [3/3] Đang tải Microsoft DesktopAppInstaller (Winget)..." -ForegroundColor Gray
+            Write-Host "  Đang tải gói Winget chính thức từ Microsoft..." -ForegroundColor Gray
             $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-            $wingetInstaller = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
-            Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetInstaller -UseBasicParsing
-            if (Test-Path $wingetInstaller) {
-                # Try system-wide provisioned install (works under Administrator)
-                try {
-                    Add-AppxProvisionedPackage -Online -PackagePath $wingetInstaller -DependencyPackagePath @($vcLibsPath, $uiXamlPath) -SkipLicense -ErrorAction SilentlyContinue | Out-Null
-                } catch {}
-                Add-AppxPackage -Path $wingetInstaller -DependencyPath $vcLibsPath, $uiXamlPath -ErrorAction SilentlyContinue
+            $wingetBundle = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
+            Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetBundle -UseBasicParsing
+
+            Write-Host "  Đang trích xuất Winget Standalone vào WinMaster..." -ForegroundColor Gray
+            Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+
+            $zip = [System.IO.Compression.ZipFile]::OpenRead($wingetBundle)
+            $x64Entry = $zip.Entries | Where-Object { $_.Name -like "*x64.msix" } | Select-Object -First 1
+            if ($x64Entry) {
+                $tempMsix = "$env:TEMP\AppInstaller_x64.msix"
+                [System.IO.Compression.ZipFileExtensions]::ExtractToFile($x64Entry, $tempMsix, $true)
+                $zip.Dispose()
+
+                $wingetDir = "$workDir\winget"
+                if (-not (Test-Path $wingetDir)) {
+                    New-Item -ItemType Directory -Path $wingetDir -Force | Out-Null
+                }
+                [System.IO.Compression.ZipFile]::ExtractToDirectory($tempMsix, $wingetDir, $true)
+                Remove-Item $tempMsix -Force -ErrorAction SilentlyContinue
+
+                # Unblock extracted files
+                Get-ChildItem -Path $wingetDir -Recurse | Unblock-File -ErrorAction SilentlyContinue
+                $env:PATH = "$wingetDir;$env:PATH"
+            } else {
+                $zip.Dispose()
             }
 
-            # Refresh PATH
-            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User") + ";$env:LOCALAPPDATA\Microsoft\WindowsApps"
-
-            # Clean up temp installers
-            Remove-Item $vcLibsPath, $uiXamlPath, $wingetInstaller -Force -ErrorAction SilentlyContinue
+            Remove-Item $wingetBundle -Force -ErrorAction SilentlyContinue
         } catch {
-            Write-Host "Lỗi trong quá trình cài đặt Winget: $_" -ForegroundColor Red
+            Write-Host "Lỗi thiết lập Winget: $_" -ForegroundColor Red
         }
     }
 
     # Re-check after installation
     if (Test-WingetFunctional) {
-        Write-Host "✅ Cài đặt Winget thành công!" -ForegroundColor Green
+        Write-Host "✅ Kích hoạt Winget thành công!" -ForegroundColor Green
     } else {
-        Write-Host "⚠️ Chưa thể kích hoạt Winget tự động. WinMaster vẫn sẽ mở (bạn có thể dùng các app tải trực tiếp)." -ForegroundColor Yellow
+        Write-Host "⚠️ Chưa thể kích hoạt Winget tự động. WinMaster vẫn sẽ mở." -ForegroundColor Yellow
     }
 } else {
     Write-Host "✅ Winget đã sẵn sàng trên hệ thống." -ForegroundColor Green

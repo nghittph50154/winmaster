@@ -115,6 +115,17 @@ public class PowerShellRunner
     {
         try
         {
+            // 1. Check WinMaster standalone extracted winget
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var standaloneWinget = Path.Combine(localAppData, @"WinMaster\winget\winget.exe");
+            if (File.Exists(standaloneWinget))
+                return standaloneWinget;
+        }
+        catch { }
+
+        try
+        {
+            // 2. Check WindowsApps DesktopAppInstaller directory
             var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             var windowsApps = Path.Combine(programFiles, "WindowsApps");
             if (Directory.Exists(windowsApps))
@@ -132,6 +143,7 @@ public class PowerShellRunner
 
         try
         {
+            // 3. Check AppExecutionAlias
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var aliasPath = Path.Combine(localAppData, @"Microsoft\WindowsApps\winget.exe");
             if (File.Exists(aliasPath))
