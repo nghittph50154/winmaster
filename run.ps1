@@ -44,6 +44,28 @@ try {
     $remoteEtag = ($head.Headers['ETag'] -join '').Trim()
 } catch {}
 
+function Stop-RunningWinMaster {
+    $procs = Get-Process -Name "WinMaster" -ErrorAction SilentlyContinue
+    if ($procs) {
+        Write-Host "Closing running WinMaster instance to apply update..." -ForegroundColor Yellow
+        $procs | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds 600
+    }
+}
+
+function Safe-RemoveDirectory {
+    param([string]$Path)
+    if (Test-Path $Path) {
+        Stop-RunningWinMaster
+        try {
+            Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
+        } catch {
+            Start-Sleep -Milliseconds 800
+            Remove-Item -Path $Path -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 # Check version & ETag: if exe exists and is up to date, launch immediately
 $needDownload = $true
 if ((Test-Path $exePath) -and (Test-Path $versionFile)) {
@@ -55,12 +77,12 @@ if ((Test-Path $exePath) -and (Test-Path $versionFile)) {
         Write-Host "WinMaster $DISPLAY_VERSION is up to date. Launching..." -ForegroundColor Cyan
     } else {
         Write-Host "Update detected for WinMaster $DISPLAY_VERSION. Downloading update..." -ForegroundColor Yellow
-        Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+        Safe-RemoveDirectory $extractPath
         Remove-Item -Path $versionFile, $etagFile -Force -ErrorAction SilentlyContinue
     }
 } elseif (Test-Path $exePath) {
     Write-Host "No version info found. Re-downloading latest WinMaster..." -ForegroundColor Yellow
-    Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+    Safe-RemoveDirectory $extractPath
 }
 
 if (-not $needDownload) {
@@ -81,7 +103,7 @@ if ($localZip -and (Test-Path $localZip)) {
 }
 
 Write-Host "Extracting WinMaster..." -ForegroundColor Green
-if (Test-Path $extractPath) { Remove-Item -Path $extractPath -Recurse -Force }
+Safe-RemoveDirectory $extractPath
 Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 
 # Unblock all extracted files (remove internet Zone Identifier to allow execution)
