@@ -1,11 +1,11 @@
 # WinMaster
 
 <div align="center">
-  <h1>🔧 WinMaster v1.0</h1>
+  <h1>🔧 WinMaster v1.1.5</h1>
   <p><strong>Windows Utility & Software Installer</strong></p>
   <p><em>TICK → RUN → DONE</em></p>
   
-  ![Version](https://img.shields.io/badge/version-1.0.0-6C63FF?style=flat-square)
+  ![Version](https://img.shields.io/badge/version-1.1.5-6C63FF?style=flat-square)
   ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
   ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square)
   ![WPF](https://img.shields.io/badge/UI-WPF-0078D4?style=flat-square)
@@ -23,19 +23,22 @@ WinMaster is a personal Windows software installer and utility tool. It lets you
 
 ## Features
 
-- **58 curated applications** across 10+ categories
-- **Dark premium UI** — wide, modern, application cards
-- **Search** — filter apps by name instantly
-- **Select All / Clear** — batch selection
-- **Sequential installation** — apps install one by one, failures don't block others
-- **Post-install verification** — confirms the app actually installed
-- **Fixed version support** — pin specific versions (Python 3.12.8, CapCut 1.5/7.0/7.7, drivers)
-- **Archive handling** — ZIP/7Z/RAR files are saved to `Downloads/`, not auto-run
-- **Internet connectivity check** — before downloading
-- **Admin privilege handling** — detects and requests UAC when needed
-- **Real-time log panel** — see exactly what's happening
-- **3 menu slots** — Install (full), Tweaks (v1.1), System Tools (v1.2)
-- **Remote installer** — `irm <url> | iex` support
+- **60+ curated applications** across 10+ categories (Browsers, Communications, Development, Document, Games, Utilities, Media, Drivers, etc.)
+- **3 Execution Modes** (Single Selection):
+  - ⚡ **Cài tự động (Silent)**: Tự động tải và cài đặt im lặng vào máy
+  - 🖥️ **Hiện Setup (Interactive)**: Hiện giao diện wizard của phần mềm để tùy biến
+  - 💾 **Chỉ tải file thôi (Download Only)**: Chỉ tải file cài đặt `.exe`/`.msi` về máy mà không cài
+- **Custom Download Location**: Tùy chọn thư mục lưu trữ file cài đặt riêng biệt
+- **PowerShell Activity Log Window**: Cửa sổ console PowerShell riêng biệt hiển thị log chi tiết thời gian thực với màu sắc chuẩn trực quan
+- **WinUtil-style Status & Progress Bar**: Thanh tiến độ tinh gọn và thông báo tóm tắt kết quả ở thanh đáy
+- **Auto-clean Manifest Files**: Tự động dọn dẹp các file `.yaml` rác sau khi tải gói winget
+- **Dark premium UI** — giao diện rộng tràn viền, hiện đại, mượt mà
+- **Search & Filter** — tìm kiếm ứng dụng tức thì
+- **Select All / Clear** — thao tác hàng loạt
+- **Sequential installation** — cài đặt tuần tự an toàn, lỗi không chặn các ứng dụng khác
+- **Tweaks Menu (v1.1)** — tối ưu hóa Windows, gỡ bỏ Bloatware, tinh chỉnh giao diện, kích hoạt bản quyền Windows / Office / IDM
+- **WinPE Menu (dự kiến v1.2)** — bộ công cụ cứu hộ và cài lại máy
+- **One-click Launcher** — chạy trực tiếp qua PowerShell: `powershell -ExecutionPolicy Bypass -File .\run.ps1`
 
 ---
 
@@ -249,10 +252,10 @@ Edit `config/applications.json` and add an entry:
 
 ## Version
 
-**Current:** `1.0.0`
+**Current:** `1.1.5`
 
 Version is managed in a single location:
-- `src/WinMaster/WinMaster.csproj` → `<Version>1.0.0</Version>`
+- `src/WinMaster/WinMaster.csproj` → `<Version>1.1.5</Version>`
 
 ---
 
@@ -260,10 +263,11 @@ Version is managed in a single location:
 
 | Version | Features |
 |---------|----------|
-| **v1.0** | Install menu, 58 apps, sequential install, verification, fixed sources ✅ |
-| **v1.1** | Tweaks menu, Windows optimization, startup management |
-| **v1.2** | System Tools menu, disk cleanup, driver management |
-| **v2.0** | Uninstall manager, update manager, installation history |
+| **v1.0** | Install menu, sequential install, verification, fixed sources ✅ |
+| **v1.1** | Tweaks menu, Windows optimization, remove bloatware, activate Windows/Office/IDM ✅ |
+| **v1.1.5** | 3 chế độ cài đặt, PowerShell Live Log, WinUtil progress bar, dọn dẹp file YAML, tối ưu 13 ứng dụng chính thức ✅ |
+| **v1.2** | WinPE menu, công cụ cứu hộ và triển khai hệ điều hành |
+| **v2.0** | Quản lý gỡ cài đặt, kiểm tra cập nhật ứng dụng tự động |
 
 ---
 
