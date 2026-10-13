@@ -69,8 +69,12 @@ public class WingetInstaller : IInstaller
             outputProgress?.Report($"Đang tải gói cài đặt {app.DisplayName} về: {targetDir}...");
             try { Directory.CreateDirectory(targetDir); } catch { }
 
+            var startTime = DateTime.Now;
             var downloadArgs = $"download --id \"{wingetId}\" {sourceArg} -d \"{targetDir}\" --accept-package-agreements --accept-source-agreements";
             var psResult = await _psRunner.RunWingetAsync(downloadArgs, cancellationToken, outputProgress);
+
+            // Tự động xóa sạch các file .yaml manifest do winget download sinh ra
+            CleanupManifestYamlFiles(targetDir, startTime);
 
             sw.Stop();
             result.Duration = sw.Elapsed;
@@ -131,5 +135,45 @@ public class WingetInstaller : IInstaller
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Xóa các file .yaml manifest do Microsoft Winget tự động xuất ra khi tải gói,
+    /// giữ cho thư mục tải về chỉ còn file cài đặt (.exe / .msi) sạch sẽ.
+    /// </summary>
+    private static void CleanupManifestYamlFiles(string targetDir, DateTime startTime)
+    {
+        try
+        {
+            if (!Directory.Exists(targetDir)) return;
+
+            var threshold = startTime.AddSeconds(-10);
+            var patterns = new[] { "*.yaml", "*.yml" };
+
+            foreach (var pattern in patterns)
+            {
+                var files = Directory.GetFiles(targetDir, pattern, SearchOption.TopDirectoryOnly);
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        var info = new FileInfo(file);
+                        if (info.LastWriteTime >= threshold || info.CreationTime >= threshold ||
+                            info.Name.Contains("_inno_") || info.Name.Contains("_exe_") ||
+                            info.Name.Contains("_User_") || info.Name.Contains("_Machine_"))
+                        {
+                            File.Delete(file);
+                        }
+                    }
+                    catch
+                    {
+                        // File có thể đang bị tiến trình khác giữ khóa
+                    }
+                }
+            }
+        }
+        catch
+        {
+        }
     }
 }
