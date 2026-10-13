@@ -205,12 +205,31 @@ public class DirectInstaller : IInstaller
             }
         }
 
-        // Determine real filename from headers if available
-        if (fileResponse.Content.Headers.ContentDisposition?.FileName != null)
+        // 1. Determine real filename from headers if available
+        if (!string.IsNullOrWhiteSpace(fileResponse.Content.Headers.ContentDisposition?.FileName))
         {
             resolvedFileName = fileResponse.Content.Headers.ContentDisposition.FileName.Trim('"', ' ');
         }
+        else if (!string.IsNullOrWhiteSpace(fileResponse.Content.Headers.ContentDisposition?.FileNameStar))
+        {
+            resolvedFileName = fileResponse.Content.Headers.ContentDisposition.FileNameStar.Trim('"', ' ');
+        }
 
+        // 2. Try extracting from final redirected RequestUri (e.g. Zalo redirects zalo-pc -> ZaloSetup-26.10.11.exe)
+        if (string.IsNullOrWhiteSpace(resolvedFileName) || string.IsNullOrWhiteSpace(Path.GetExtension(resolvedFileName)))
+        {
+            var finalUri = fileResponse.RequestMessage?.RequestUri;
+            if (finalUri != null)
+            {
+                var candidate = Path.GetFileName(finalUri.LocalPath);
+                if (!string.IsNullOrWhiteSpace(candidate) && !string.IsNullOrWhiteSpace(Path.GetExtension(candidate)))
+                {
+                    resolvedFileName = candidate;
+                }
+            }
+        }
+
+        // 3. Fallback to initial URL or app Id
         if (string.IsNullOrWhiteSpace(resolvedFileName))
         {
             if (url.Contains("drive.google.com") || url.Contains("docs.google.com"))
@@ -220,15 +239,62 @@ public class DirectInstaller : IInstaller
             else
             {
                 var uri = new Uri(url);
-                resolvedFileName = Path.GetFileName(uri.LocalPath);
-                if (string.IsNullOrWhiteSpace(resolvedFileName))
+                var candidate = Path.GetFileName(uri.LocalPath);
+                if (!string.IsNullOrWhiteSpace(candidate) && !string.IsNullOrWhiteSpace(Path.GetExtension(candidate)))
+                {
+                    resolvedFileName = candidate;
+                }
+                else if (!string.IsNullOrWhiteSpace(candidate))
+                {
+                    resolvedFileName = $"{candidate}.exe";
+                }
+                else
+                {
                     resolvedFileName = $"{app.Id}-installer.exe";
+                }
             }
+        }
+
+        // Clean filename (URL decode and strip invalid filename characters)
+        try
+        {
+            resolvedFileName = Uri.UnescapeDataString(resolvedFileName);
+        }
+        catch { }
+
+        foreach (var c in Path.GetInvalidFileNameChars())
+        {
+            resolvedFileName = resolvedFileName.Replace(c, '_');
+        }
+
+        // 4. Guarantee filename has an installer extension (.exe default)
+        if (string.IsNullOrWhiteSpace(Path.GetExtension(resolvedFileName)))
+        {
+            resolvedFileName = $"{resolvedFileName}.exe";
         }
 
         var targetFolder = !string.IsNullOrWhiteSpace(customInstallPath) && Directory.Exists(customInstallPath)
             ? customInstallPath
             : FileSystemHelper.GetDownloadsFolder();
+
+        // Clean up legacy broken extensionless file if it exists in target folder (e.g. old "zalo-pc" file)
+        try
+        {
+            var oldNoExtPath = Path.Combine(targetFolder, Path.GetFileNameWithoutExtension(resolvedFileName));
+            if (File.Exists(oldNoExtPath) && string.IsNullOrWhiteSpace(Path.GetExtension(oldNoExtPath)))
+            {
+                File.Delete(oldNoExtPath);
+            }
+            if (app.Id == "zalo")
+            {
+                var oldZaloPath = Path.Combine(targetFolder, "zalo-pc");
+                if (File.Exists(oldZaloPath) && string.IsNullOrWhiteSpace(Path.GetExtension(oldZaloPath)))
+                {
+                    File.Delete(oldZaloPath);
+                }
+            }
+        }
+        catch { }
 
         var downloadPath = Path.Combine(targetFolder, resolvedFileName);
 
@@ -388,7 +454,7 @@ public class DirectInstaller : IInstaller
         {
             arguments = category == FileCategory.Installer
                 ? $"/i \"{filePath}\" /quiet /norestart"
-                : "/S /silent /quiet /norestart";
+                : "/S";
         }
         else
         {
