@@ -203,17 +203,17 @@
                         </Button.Content>
                     </Button>
 
-                    <!-- MENU 3 tab -->
+                    <!-- MENU 3 tab (WinPE) -->
                     <Button Style="{StaticResource NavButtonStyle}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter="menu3">
                         <Button.Content>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="SYSTEM TOOLS" FontSize="13" FontWeight="SemiBold"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="WINPE" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                 <Border Background="{StaticResource SurfaceElevatedBrush}"
-                                        CornerRadius="4" Padding="5,1">
-                                    <TextBlock Text="SOON" FontSize="9" Foreground="{StaticResource TextMutedBrush}"
-                                               FontWeight="SemiBold"/>
+                                        CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="v1.2" FontSize="9" Foreground="#38BDF8"
+                                               FontWeight="Bold"/>
                                 </Border>
                             </StackPanel>
                         </Button.Content>

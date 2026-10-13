@@ -33,10 +33,9 @@ public partial class MainViewModel : ObservableObject
         TweaksVM = tweaksVM;
 
         Menu3VM = new PlaceholderViewModel(
-            "System Tools",
-            "Advanced system management, driver tools, and maintenance utilities. " +
-            "Manage startup programs, clean temp files, and monitor system health.\n\n" +
-            "This feature is currently under development.",
+            "WinPE",
+            "Tạo USB Boot WinPE cứu hộ máy tính, tích hợp bộ công cụ phân vùng ổ đĩa, sao lưu / phục hồi hệ thống và cài driver cứu hộ chuyên dụng.\n\n" +
+            "Tính năng này đang được phát triển và sẽ ra mắt chính thức trong phiên bản v1.2.",
             "v1.2");
 
         _currentView = InstallVM;
