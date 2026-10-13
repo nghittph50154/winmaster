@@ -66,6 +66,128 @@ public class PowerShellRunner
         return await ExecuteAsync(PowerShellPath, args, cancellationToken, outputProgress);
     }
 
+    private static bool _wingetCheckedAndReady = false;
+
+    /// <summary>
+    /// Checks if winget is available; if not, automatically installs WinGet like WinUtil (Microsoft.WinGet.Client / Repair-WinGetPackageManager).
+    /// </summary>
+    public async Task<bool> EnsureWingetInstalledAsync(
+        IProgress<string>? outputProgress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (_wingetCheckedAndReady) return true;
+
+        if (IsWingetInstalled())
+        {
+            _wingetCheckedAndReady = true;
+            return true;
+        }
+
+        outputProgress?.Report("⚡ WinGet chưa có sẵn. Đang tự động cài đặt WinGet theo cơ chế WinUtil (Microsoft.WinGet.Client)...");
+
+        // 1. WinUtil mechanism: Microsoft.WinGet.Client module + Repair-WinGetPackageManager
+        var winUtilInstallScript = @"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+try {
+    Install-PackageProvider -Name NuGet -Force -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+    Install-Module -Name Microsoft.WinGet.Client -Force -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+    Repair-WinGetPackageManager -AllUsers -ErrorAction SilentlyContinue | Out-Null
+} catch {}
+";
+        await RunCommandAsync(winUtilInstallScript, cancellationToken, outputProgress);
+
+        if (IsWingetInstalled())
+        {
+            outputProgress?.Report("✅ Cài đặt và kích hoạt WinGet thành công!");
+            _wingetCheckedAndReady = true;
+            return true;
+        }
+
+        // 2. Fallback: Register existing Appx DesktopAppInstaller
+        outputProgress?.Report("Đang kích hoạt gói DesktopAppInstaller trên Windows...");
+        var registerScript = @"
+Get-AppxPackage -AllUsers *DesktopAppInstaller* -ErrorAction SilentlyContinue | ForEach-Object {
+    Add-AppxPackage -DisableDevelopmentMode -Register ""$($_.InstallLocation)\AppxManifest.xml"" -ErrorAction SilentlyContinue
+}
+";
+        await RunCommandAsync(registerScript, cancellationToken, outputProgress);
+
+        if (IsWingetInstalled())
+        {
+            outputProgress?.Report("✅ Kích hoạt WinGet thành công!");
+            _wingetCheckedAndReady = true;
+            return true;
+        }
+
+        // 3. Fallback: Standalone winget release
+        outputProgress?.Report("Đang tải bản Winget Standalone chính thức từ Microsoft...");
+        var fallbackScript = @"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+$workDir = ""$env:LOCALAPPDATA\WinMaster""
+$wingetUrl = ""https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle""
+$wingetBundle = ""$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle""
+try {
+    Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetBundle -UseBasicParsing
+    Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($wingetBundle)
+    $x64Entry = $zip.Entries | Where-Object { $_.Name -like ""*x64.msix"" } | Select-Object -First 1
+    if ($x64Entry) {
+        $tempMsix = ""$env:TEMP\AppInstaller_x64.msix""
+        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($x64Entry, $tempMsix, $true)
+        $zip.Dispose()
+        $wingetDir = ""$workDir\winget""
+        if (-not (Test-Path $wingetDir)) { New-Item -ItemType Directory -Path $wingetDir -Force | Out-Null }
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($tempMsix, $wingetDir, $true)
+        Remove-Item $tempMsix -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path $wingetDir -Recurse | Unblock-File -ErrorAction SilentlyContinue
+    } else {
+        $zip.Dispose()
+    }
+    Remove-Item $wingetBundle -Force -ErrorAction SilentlyContinue
+} catch {}
+";
+        await RunCommandAsync(fallbackScript, cancellationToken, outputProgress);
+
+        if (IsWingetInstalled())
+        {
+            outputProgress?.Report("✅ Cài đặt WinGet thành công!");
+            _wingetCheckedAndReady = true;
+            return true;
+        }
+
+        outputProgress?.Report("⚠️ Không thể cài đặt WinGet tự động.");
+        return false;
+    }
+
+    public static bool IsWingetInstalled()
+    {
+        var exe = FindWingetExecutable();
+        if (!string.IsNullOrEmpty(exe)) return true;
+
+        try
+        {
+            using var proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "winget",
+                    Arguments = "--version",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            proc.Start();
+            proc.WaitForExit(3000);
+            return proc.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     /// <summary>
     /// Runs a winget command.
     /// </summary>
@@ -74,6 +196,9 @@ public class PowerShellRunner
         CancellationToken cancellationToken = default,
         IProgress<string>? outputProgress = null)
     {
+        // Automatically check and install WinGet like WinUtil before executing
+        await EnsureWingetInstalledAsync(outputProgress, cancellationToken);
+
         // 1. Try direct path to winget.exe (bypasses AppExecutionAlias error 1920)
         var directWinget = FindWingetExecutable();
         if (!string.IsNullOrEmpty(directWinget))

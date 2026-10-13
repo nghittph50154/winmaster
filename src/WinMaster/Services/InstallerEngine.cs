@@ -56,6 +56,7 @@ public class InstallerEngine
         IReadOnlyList<ApplicationEntry> selectedApps,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         CancellationToken cancellationToken = default)
     {
         if (_isRunning)
@@ -136,9 +137,10 @@ public class InstallerEngine
                     StatusMessage = $"Installing {app.DisplayName}..."
                 });
 
-                _logService.Info($"─── [{i + 1}/{selectedApps.Count}] Installing {app.DisplayName} ───", app.Id);
+                var actionVerb = isDownloadOnly ? "Downloading" : "Installing";
+                _logService.Info($"─── [{i + 1}/{selectedApps.Count}] {actionVerb} {app.DisplayName} ───", app.Id);
 
-                var result = await InstallSingleAppAsync(app, i, selectedApps.Count, customInstallPath, isInteractive, cancellationToken);
+                var result = await InstallSingleAppAsync(app, i, selectedApps.Count, customInstallPath, isInteractive, isDownloadOnly, cancellationToken);
                 summary.Results.Add(result);
                 AppCompleted?.Invoke(this, result);
 
@@ -190,6 +192,7 @@ public class InstallerEngine
         int total,
         string? customInstallPath,
         bool isInteractive,
+        bool isDownloadOnly,
         CancellationToken cancellationToken)
     {
         // Find the right installer
@@ -207,7 +210,7 @@ public class InstallerEngine
         }
 
         // Check admin if needed
-        if (app.RequiresAdmin && !_adminService.IsRunningAsAdmin())
+        if (app.RequiresAdmin && !_adminService.IsRunningAsAdmin() && !isDownloadOnly)
         {
             _logService.Warning($"{app.DisplayName} may require Administrator privileges.");
             // Don't block — some installers handle UAC internally (winget, EXE with UAC manifest)
@@ -223,7 +226,7 @@ public class InstallerEngine
                 {
                     CurrentAppId = app.Id,
                     CurrentAppName = app.DisplayName,
-                    CurrentStatus = InstallStatus.Installing,
+                    CurrentStatus = isDownloadOnly ? InstallStatus.Downloading : InstallStatus.Installing,
                     CurrentIndex = index + 1,
                     TotalCount = total,
                     StatusMessage = line.Length > 80 ? line[..80] + "…" : line
@@ -242,10 +245,10 @@ public class InstallerEngine
                 CurrentStatus = InstallStatus.Downloading,
                 CurrentIndex = index + 1,
                 TotalCount = total,
-                StatusMessage = $"Preparing {app.DisplayName}..."
+                StatusMessage = isDownloadOnly ? $"Downloading {app.DisplayName}..." : $"Preparing {app.DisplayName}..."
             });
 
-            result = await installer.InstallAsync(app, customInstallPath, isInteractive, outputProgress, cancellationToken);
+            result = await installer.InstallAsync(app, customInstallPath, isInteractive, isDownloadOnly, outputProgress, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -258,6 +261,17 @@ public class InstallerEngine
                 ErrorMessage = ex.Message,
                 CompletedAt = DateTime.Now
             };
+        }
+
+        // If download only mode, mark success and skip executable verification
+        if (isDownloadOnly)
+        {
+            if (result.Status == InstallStatus.Installing || result.IsSuccess)
+            {
+                result.Status = InstallStatus.Success;
+                result.VerificationDetail = $"File cài đặt đã được lưu vào thư mục chỉ định.";
+            }
+            return result;
         }
 
         // If installer says "Installing" (not explicitly failed), run verification

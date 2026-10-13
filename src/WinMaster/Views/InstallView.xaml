@@ -222,7 +222,7 @@
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
                             <TextBlock Text="📁" FontSize="13" Margin="0,0,6,0"/>
-                            <TextBlock Text="Install Location:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="Vị trí lưu file exe:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
 
                         <Border Grid.Column="1"
@@ -238,7 +238,7 @@
                                      Foreground="{StaticResource TextPrimaryBrush}"
                                      FontSize="12"
                                      VerticalAlignment="Center"
-                                     ToolTip="Default folder is Downloads. Type or click Browse... to change."/>
+                                     ToolTip="Thư mục lưu trữ file cài đặt .exe khi chọn 'Chỉ tải file không cài đặt' (Mặc định: Downloads). Bấm Browse... để đổi."/>
                         </Border>
 
                         <Button Grid.Column="2"
@@ -253,17 +253,36 @@
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Command="{Binding ClearCustomInstallPathCommand}"
                                 Padding="8,4"
-                                ToolTip="Reset to default location"/>
+                                ToolTip="Reset về thư mục Downloads mặc định"/>
 
-                        <CheckBox Grid.Column="4"
-                                  IsChecked="{Binding IsInteractiveMode, Mode=TwoWay}"
-                                  Content="🖥 Hiện cửa sổ Setup (Cho phép tùy chỉnh)"
-                                  Foreground="{StaticResource TextPrimaryBrush}"
-                                  FontSize="12"
-                                  FontWeight="Bold"
-                                  VerticalAlignment="Center"
-                                  Margin="14,0,0,0"
-                                  ToolTip="Mở cửa sổ cài đặt chính thức (Setup Wizard) để bạn bấm Next và tự chọn đường dẫn cài đặt trực tiếp trên bảng cài đặt của từng ứng dụng."/>
+                        <!-- Single Selection: Chế độ cài đặt & Tải file -->
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                            <RadioButton Content="⚡ Cài tự động"
+                                         IsChecked="{Binding IsSilentMode, Mode=TwoWay}"
+                                         GroupName="InstallModeGroup"
+                                         Foreground="{StaticResource TextPrimaryBrush}"
+                                         FontSize="12"
+                                         FontWeight="SemiBold"
+                                         Margin="0,0,10,0"
+                                         ToolTip="Cài đặt hoàn toàn tự động, im lặng trong nền."/>
+
+                            <RadioButton Content="🖥 Hiện Setup Wizard"
+                                         IsChecked="{Binding IsInteractiveMode, Mode=TwoWay}"
+                                         GroupName="InstallModeGroup"
+                                         Foreground="{StaticResource TextPrimaryBrush}"
+                                         FontSize="12"
+                                         FontWeight="SemiBold"
+                                         Margin="0,0,10,0"
+                                         ToolTip="Mở cửa sổ cài đặt chính thức của ứng dụng để bấm Next và tùy chỉnh."/>
+
+                            <RadioButton Content="💾 Chỉ tải file không cài đặt"
+                                         IsChecked="{Binding IsDownloadOnlyMode, Mode=TwoWay}"
+                                         GroupName="InstallModeGroup"
+                                         Foreground="#38BDF8"
+                                         FontSize="12"
+                                         FontWeight="Bold"
+                                         ToolTip="Chỉ tải file cài đặt .exe / .zip về thư mục đã chọn mà không chạy cài đặt."/>
+                        </StackPanel>
                     </Grid>
 
                     <!-- Row 2: Action Controls & RUN Button -->
@@ -294,7 +313,7 @@
 
                         <!-- RUN button -->
                         <Button Grid.Column="2"
-                                Content="▶  RUN INSTALLATION"
+                                Content="{Binding RunButtonText}"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 FontSize="13"
                                 Padding="28,10"

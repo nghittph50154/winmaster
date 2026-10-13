@@ -16,6 +16,7 @@ public interface IInstaller
         ApplicationEntry app,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         IProgress<string>? outputProgress = null,
         CancellationToken cancellationToken = default);
 

@@ -22,6 +22,7 @@ public class FixedSourceInstaller : IInstaller
         ApplicationEntry app,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         IProgress<string>? outputProgress = null,
         CancellationToken cancellationToken = default)
     {
@@ -84,6 +85,22 @@ public class FixedSourceInstaller : IInstaller
         }
 
         outputProgress?.Report($"Found source file: {Path.GetFileName(sourceFile)}");
+
+        if (isDownloadOnly)
+        {
+            var targetFolder = !string.IsNullOrWhiteSpace(customInstallPath)
+                ? customInstallPath
+                : FileSystemHelper.GetDownloadsFolder();
+            try { Directory.CreateDirectory(targetFolder); } catch { }
+            var destPath = Path.Combine(targetFolder, Path.GetFileName(sourceFile));
+            File.Copy(sourceFile, destPath, overwrite: true);
+            outputProgress?.Report($"✅ Đã lưu file cài đặt {app.DisplayName} vào: {destPath}");
+            result.Status = InstallStatus.Success;
+            result.VerificationDetail = $"File saved to: {destPath}";
+            sw.Stop(); result.Duration = sw.Elapsed;
+            result.CompletedAt = DateTime.Now;
+            return result;
+        }
 
         // Check actual file type — do NOT assume
         var category = FileSystemHelper.GetFileCategory(sourceFile);

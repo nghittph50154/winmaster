@@ -11,116 +11,13 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 Write-Host "=== WinMaster Launcher ===" -ForegroundColor Cyan
 
 $workDir = "$env:LOCALAPPDATA\WinMaster"
-$standaloneWinget = "$workDir\winget\winget.exe"
-
-# Function to test if winget is truly executable and functional
-function Test-WingetFunctional {
-    # 0. Check WinMaster standalone extracted winget
-    if (Test-Path $standaloneWinget) {
-        try {
-            $p = Start-Process -FilePath $standaloneWinget -ArgumentList "--version" -NoNewWindow -PassThru -Wait -ErrorAction Stop
-            if ($p.ExitCode -eq 0) {
-                $dir = Split-Path -Parent $standaloneWinget
-                $env:PATH = "$dir;$env:PATH"
-                return $true
-            }
-        } catch {}
-    }
-
-    # 1. Check direct executable in WindowsApps folder (fastest and bypasses alias restrictions)
-    try {
-        $dirs = Get-Item "C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*" -ErrorAction SilentlyContinue | Sort-Object FullName -Descending
-        foreach ($d in $dirs) {
-            $candidate = Join-Path $d.FullName "winget.exe"
-            if (Test-Path $candidate) {
-                $p = Start-Process -FilePath $candidate -ArgumentList "--version" -NoNewWindow -PassThru -Wait -ErrorAction Stop
-                if ($p.ExitCode -eq 0) {
-                    $env:PATH = "$($d.FullName);$env:PATH"
-                    return $true
-                }
-            }
-        }
-    } catch {}
-
-    # 2. Try standard PATH / winget command
-    try {
-        $p = Start-Process -FilePath "winget" -ArgumentList "--version" -NoNewWindow -PassThru -Wait -ErrorAction Stop
-        if ($p.ExitCode -eq 0) { return $true }
-    } catch {}
-
-    return $false
-}
-
-# Check and install winget if missing or broken before launching WinMaster
-Write-Host ">>> Kiểm tra Windows Package Manager (Winget)..." -ForegroundColor Cyan
-if (-not (Test-WingetFunctional)) {
-    Write-Host "Winget chưa sẵn sàng. Đang tự động thiết lập Winget cho hệ thống..." -ForegroundColor Yellow
-
-    # Try registering existing provisioned package first
-    try {
-        Get-AppxPackage -AllUsers *DesktopAppInstaller* -ErrorAction SilentlyContinue | ForEach-Object {
-            Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppxManifest.xml" -ErrorAction SilentlyContinue
-        }
-    } catch {}
-
-    # If still not functional, download msixbundle and extract standalone winget
-    if (-not (Test-WingetFunctional)) {
-        try {
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
-
-            Write-Host "  Đang tải gói Winget chính thức từ Microsoft..." -ForegroundColor Gray
-            $wingetUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-            $wingetBundle = "$env:TEMP\Microsoft.DesktopAppInstaller.msixbundle"
-            Invoke-WebRequest -Uri $wingetUrl -OutFile $wingetBundle -UseBasicParsing
-
-            Write-Host "  Đang trích xuất Winget Standalone vào WinMaster..." -ForegroundColor Gray
-            Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
-
-            $zip = [System.IO.Compression.ZipFile]::OpenRead($wingetBundle)
-            $x64Entry = $zip.Entries | Where-Object { $_.Name -like "*x64.msix" } | Select-Object -First 1
-            if ($x64Entry) {
-                $tempMsix = "$env:TEMP\AppInstaller_x64.msix"
-                [System.IO.Compression.ZipFileExtensions]::ExtractToFile($x64Entry, $tempMsix, $true)
-                $zip.Dispose()
-
-                $wingetDir = "$workDir\winget"
-                if (-not (Test-Path $wingetDir)) {
-                    New-Item -ItemType Directory -Path $wingetDir -Force | Out-Null
-                }
-                [System.IO.Compression.ZipFile]::ExtractToDirectory($tempMsix, $wingetDir, $true)
-                Remove-Item $tempMsix -Force -ErrorAction SilentlyContinue
-
-                # Unblock extracted files
-                Get-ChildItem -Path $wingetDir -Recurse | Unblock-File -ErrorAction SilentlyContinue
-                $env:PATH = "$wingetDir;$env:PATH"
-            } else {
-                $zip.Dispose()
-            }
-
-            Remove-Item $wingetBundle -Force -ErrorAction SilentlyContinue
-        } catch {
-            Write-Host "Lỗi thiết lập Winget: $_" -ForegroundColor Red
-        }
-    }
-
-    # Re-check after installation
-    if (Test-WingetFunctional) {
-        Write-Host "✅ Kích hoạt Winget thành công!" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️ Chưa thể kích hoạt Winget tự động. WinMaster vẫn sẽ mở." -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "✅ Winget đã sẵn sàng trên hệ thống." -ForegroundColor Green
-}
-
-$workDir = "$env:LOCALAPPDATA\WinMaster"
 $exePath = "$workDir\App\WinMaster.exe"
 $zipPath = "$workDir\WinMaster.zip"
 $extractPath = "$workDir\App"
 $versionFile = "$workDir\version.txt"
 $etagFile = "$workDir\etag.txt"
 $zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
-$EXPECTED_VERSION = "1.1.3"
+$EXPECTED_VERSION = "1.1.4"
 
 if (-not (Test-Path $workDir)) {
     New-Item -ItemType Directory -Path $workDir -Force | Out-Null
@@ -162,9 +59,16 @@ if (-not $needDownload) {
     exit
 }
 
-Write-Host "Downloading WinMaster $EXPECTED_VERSION..." -ForegroundColor Green
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
-Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
+$localZip = if ($PSScriptRoot) { Join-Path $PSScriptRoot "publish_out\WinMaster.zip" } else { $null }
+
+if ($localZip -and (Test-Path $localZip)) {
+    Write-Host "Installing WinMaster $EXPECTED_VERSION from local package..." -ForegroundColor Green
+    Copy-Item -Path $localZip -Destination $zipPath -Force
+} else {
+    Write-Host "Downloading WinMaster $EXPECTED_VERSION..." -ForegroundColor Green
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+    Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
+}
 
 Write-Host "Extracting WinMaster..." -ForegroundColor Green
 if (Test-Path $extractPath) { Remove-Item -Path $extractPath -Recurse -Force }

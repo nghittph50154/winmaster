@@ -365,12 +365,33 @@
     },
 
     {
-      "id": "antigravity",
-      "name": "Antigravity",
-      "displayName": "Antigravity",
+      "id": "antigravity-ide",
+      "name": "Google Antigravity IDE",
+      "displayName": "Antigravity IDE",
       "category": "Development",
-      "description": "Google Antigravity IDE",
-      "tags": ["ide", "google", "ai"],
+      "description": "Google Antigravity IDE — môi trường phát triển AI Agent-first",
+      "tags": ["ide", "google", "ai", "agent", "development"],
+      "installer": {
+        "type": "winget",
+        "wingetId": "Google.AntigravityIDE"
+      },
+      "verification": {
+        "strategies": ["executable"],
+        "executableName": "Antigravity.exe"
+      },
+      "requiresAdmin": false,
+      "versionPolicy": "latest",
+      "iconSource": "embedded",
+      "status": "stable"
+    },
+
+    {
+      "id": "antigravity",
+      "name": "Google Antigravity 2.0",
+      "displayName": "Antigravity 2.0",
+      "category": "Development",
+      "description": "Google Antigravity 2.0 — trung tâm điều phối AI agent độc lập",
+      "tags": ["agent", "google", "ai", "orchestrator"],
       "installer": {
         "type": "winget",
         "wingetId": "Google.Antigravity"
@@ -411,15 +432,17 @@
       "name": "Microsoft Office 365",
       "displayName": "Office 365",
       "category": "Microsoft",
-      "description": "Microsoft 365 productivity suite",
+      "description": "Microsoft 365 Apps for enterprise (Word, Excel, PowerPoint, Outlook)",
       "tags": ["office", "microsoft", "word", "excel", "productivity"],
       "installer": {
         "type": "winget",
-        "wingetId": "Microsoft.Office"
+        "wingetId": "Microsoft.Office",
+        "directUrl": "https://officecdn.microsoft.com/pr/wsus/setup.exe"
       },
       "verification": {
-        "strategies": ["registry"],
-        "registryKey": "HKLM:\\SOFTWARE\\Microsoft\\Office"
+        "strategies": ["registry", "executable"],
+        "registryKey": "HKLM:\\SOFTWARE\\Microsoft\\Office",
+        "executableName": "WINWORD.EXE"
       },
       "requiresAdmin": true,
       "versionPolicy": "latest",
@@ -456,11 +479,13 @@
       "description": "Digital note-taking and PDF annotation app",
       "tags": ["notes", "pdf", "writing"],
       "installer": {
-        "type": "store",
-        "storeId": "9NBLGGH4S79R"
+        "type": "winget",
+        "wingetId": "9N92MC09DB30",
+        "source": "msstore"
       },
       "verification": {
-        "strategies": []
+        "strategies": ["command"],
+        "command": "Get-AppxPackage *GoodNotes*"
       },
       "requiresAdmin": false,
       "versionPolicy": "latest",
@@ -1038,14 +1063,14 @@
 
     {
       "id": "vmware",
-      "name": "VMware",
+      "name": "VMware Workstation Pro",
       "displayName": "VMware",
       "category": "Utilities",
-      "description": "VMware Workstation Pro — virtual machines",
-      "tags": ["virtualization", "vm", "vmware"],
+      "description": "VMware Workstation Pro 17 — máy ảo chuyên nghiệp",
+      "tags": ["virtualization", "vm", "vmware", "workstation"],
       "installer": {
-        "type": "winget",
-        "wingetId": "VMware.WorkstationPro"
+        "type": "direct",
+        "directUrl": "https://archive.org/download/vmwareworkstationarchive/17.x/VMware-workstation-full-17.6.2-24409262.exe"
       },
       "verification": {
         "strategies": ["executable"],
@@ -1059,14 +1084,14 @@
 
     {
       "id": "xp-pen",
-      "name": "XP-Pen Tablet",
+      "name": "XP-Pen Tablet Driver",
       "displayName": "XP-Pen",
       "category": "Drive",
-      "description": "XP-Pen drawing tablet driver and software",
+      "description": "XP-Pen drawing tablet driver and software chính thức",
       "tags": ["tablet", "driver", "drawing", "xp-pen"],
       "installer": {
-        "type": "winget",
-        "wingetId": "XP-PEN.XP-PENTabletDriver"
+        "type": "direct",
+        "directUrl": "https://www.xp-pen.com/download/file.html?id=2866&pid=66&ext=zip"
       },
       "verification": {
         "strategies": ["executable"],

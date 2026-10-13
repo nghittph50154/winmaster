@@ -22,6 +22,7 @@ public class DirectInstaller : IInstaller
         ApplicationEntry app,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         IProgress<string>? outputProgress = null,
         CancellationToken cancellationToken = default)
     {
@@ -64,6 +65,17 @@ public class DirectInstaller : IInstaller
             result.ErrorMessage = $"Unexpected error during download: {ex.Message}";
             sw.Stop();
             result.Duration = sw.Elapsed;
+            return result;
+        }
+
+        // If download only, finish without running installer
+        if (isDownloadOnly)
+        {
+            sw.Stop();
+            result.Duration = sw.Elapsed;
+            result.CompletedAt = DateTime.Now;
+            result.Status = InstallStatus.Success;
+            outputProgress?.Report($"✅ Đã tải xong file cài đặt {app.DisplayName} vào: {downloadedFilePath}");
             return result;
         }
 
