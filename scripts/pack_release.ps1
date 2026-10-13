@@ -10,6 +10,9 @@ Write-Host "Publish output directory: $publishOut" -ForegroundColor Cyan
 if (Test-Path $tempZip) {
     Remove-Item $tempZip -Force
 }
+if (Test-Path $zipPath) {
+    Remove-Item $zipPath -Force
+}
 
 $items = Get-ChildItem -Path $publishOut | Where-Object { $_.Name -ne "WinMaster.zip" }
 Write-Host "Found $($items.Count) top-level items to compress." -ForegroundColor Cyan
