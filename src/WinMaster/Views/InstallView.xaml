@@ -231,16 +231,16 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <RadioButton Content="⚡ Cài tự động (Silent)"
+                                <RadioButton Content="⚡ Cài tự động"
                                              IsChecked="{Binding IsSilentMode, Mode=TwoWay}"
                                              GroupName="InstallModeGroup"
                                              Foreground="{StaticResource TextPrimaryBrush}"
                                              FontSize="12"
                                              FontWeight="SemiBold"
                                              Margin="0,0,18,0"
-                                             ToolTip="Cài đặt hoàn toàn tự động, im lặng trong nền (không hiện cửa sổ wizard). Phù hợp cài nhanh nhiều app."/>
+                                             ToolTip="Cài đặt hoàn toàn tự động, im lặng trong nền (không hiện cửa sổ wizard)."/>
 
-                                <RadioButton Content="🖥 Hiện Setup Wizard (Interactive)"
+                                <RadioButton Content="🖥 Hiện Setup"
                                              IsChecked="{Binding IsInteractiveMode, Mode=TwoWay}"
                                              GroupName="InstallModeGroup"
                                              Foreground="{StaticResource TextPrimaryBrush}"
@@ -249,7 +249,7 @@
                                              Margin="0,0,18,0"
                                              ToolTip="Mở giao diện cài đặt chính thức của phần mềm để tự bấm Next và tùy chọn tính năng."/>
 
-                                <RadioButton Content="💾 Chỉ tải file không cài đặt (Download only)"
+                                <RadioButton Content="💾 Chỉ tải file"
                                              IsChecked="{Binding IsDownloadOnlyMode, Mode=TwoWay}"
                                              GroupName="InstallModeGroup"
                                              Foreground="#38BDF8"
