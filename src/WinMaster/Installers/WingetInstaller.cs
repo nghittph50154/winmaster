@@ -66,6 +66,30 @@ public class WingetInstaller : IInstaller
         // 1. Download only mode (Chỉ tải file không cài đặt)
         if (isDownloadOnly)
         {
+            if (isMsStore)
+            {
+                outputProgress?.Report($"Ứng dụng Microsoft Store không có file .exe rời. Đang mở Microsoft Store cho {app.DisplayName}...");
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = $"ms-windows-store://pdp/?productid={wingetId}",
+                        UseShellExecute = true
+                    });
+                    sw.Stop();
+                    result.Duration = sw.Elapsed;
+                    result.CompletedAt = DateTime.Now;
+                    result.Status = InstallStatus.Success;
+                    result.VerificationDetail = "Đã mở trang Microsoft Store để cài đặt.";
+                    outputProgress?.Report($"✅ Đã mở Microsoft Store cho {app.DisplayName}. Vui lòng bấm 'Get' / 'Cài đặt'.");
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    outputProgress?.Report($"Không thể mở Microsoft Store tự động: {ex.Message}");
+                }
+            }
+
             outputProgress?.Report($"Đang tải gói cài đặt {app.DisplayName} về: {targetDir}...");
             try { Directory.CreateDirectory(targetDir); } catch { }
 
@@ -97,6 +121,25 @@ public class WingetInstaller : IInstaller
         }
 
         // 2. Regular Install mode
+        if (isMsStore && isInteractive)
+        {
+            outputProgress?.Report($"Đang mở ứng dụng trên Microsoft Store: {app.DisplayName}...");
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = $"ms-windows-store://pdp/?productid={wingetId}",
+                    UseShellExecute = true
+                });
+                sw.Stop();
+                result.Duration = sw.Elapsed;
+                result.CompletedAt = DateTime.Now;
+                result.Status = InstallStatus.Installing;
+                return result;
+            }
+            catch { }
+        }
+
         outputProgress?.Report($"Downloading and installing {app.DisplayName} via package manager...");
 
         var modeArgs = isInteractive ? "--interactive" : "--silent --disable-interactivity";
@@ -124,6 +167,25 @@ public class WingetInstaller : IInstaller
             {
                 result.Status = InstallStatus.Installing;
                 outputProgress?.Report($"{app.DisplayName} was already installed or is up to date.");
+            }
+            else if (isMsStore)
+            {
+                // Fallback: nếu winget install gặp lỗi Entra ID/Store policy, mở trực tiếp Microsoft Store
+                outputProgress?.Report($"Mở trực tiếp Microsoft Store cho {app.DisplayName} (sử dụng tài khoản đã đăng nhập sẵn)...");
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = $"ms-windows-store://pdp/?productid={wingetId}",
+                        UseShellExecute = true
+                    });
+                    result.Status = InstallStatus.Installing;
+                }
+                catch
+                {
+                    result.Status = InstallStatus.Failed;
+                    result.ErrorMessage = "Không thể mở Microsoft Store.";
+                }
             }
             else
             {
