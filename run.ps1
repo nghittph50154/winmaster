@@ -26,7 +26,8 @@ $extractPath = "$workDir\App"
 $versionFile = "$workDir\version.txt"
 $etagFile = "$workDir\etag.txt"
 $zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
-$EXPECTED_VERSION = "1.1.4"
+$EXPECTED_VERSION = "1.1.5"
+$DISPLAY_VERSION = "v$EXPECTED_VERSION"
 
 if (-not (Test-Path $workDir)) {
     New-Item -ItemType Directory -Path $workDir -Force | Out-Null
@@ -51,9 +52,9 @@ if ((Test-Path $exePath) -and (Test-Path $versionFile)) {
 
     if ($localVersion -eq $EXPECTED_VERSION -and ($remoteEtag -eq "" -or $localEtag -eq $remoteEtag)) {
         $needDownload = $false
-        Write-Host "WinMaster $EXPECTED_VERSION is up to date. Launching..." -ForegroundColor Cyan
+        Write-Host "WinMaster $DISPLAY_VERSION is up to date. Launching..." -ForegroundColor Cyan
     } else {
-        Write-Host "Update detected for WinMaster $EXPECTED_VERSION. Downloading update..." -ForegroundColor Yellow
+        Write-Host "Update detected for WinMaster $DISPLAY_VERSION. Downloading update..." -ForegroundColor Yellow
         Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Path $versionFile, $etagFile -Force -ErrorAction SilentlyContinue
     }
@@ -71,10 +72,10 @@ if (-not $needDownload) {
 $localZip = if ($PSScriptRoot) { Join-Path $PSScriptRoot "publish_out\WinMaster.zip" } else { $null }
 
 if ($localZip -and (Test-Path $localZip)) {
-    Write-Host "Installing WinMaster $EXPECTED_VERSION from local package..." -ForegroundColor Green
+    Write-Host "Installing WinMaster $DISPLAY_VERSION from local package..." -ForegroundColor Green
     Copy-Item -Path $localZip -Destination $zipPath -Force
 } else {
-    Write-Host "Downloading WinMaster $EXPECTED_VERSION..." -ForegroundColor Green
+    Write-Host "Downloading WinMaster $DISPLAY_VERSION..." -ForegroundColor Green
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
     Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
 }
@@ -90,6 +91,6 @@ Get-ChildItem -Path $extractPath -Recurse | Unblock-File -ErrorAction SilentlyCo
 Set-Content -Path $versionFile -Value $EXPECTED_VERSION
 if ($remoteEtag) { Set-Content -Path $etagFile -Value $remoteEtag }
 
-Write-Host "Launching WinMaster $EXPECTED_VERSION..." -ForegroundColor Cyan
+Write-Host "Launching WinMaster $DISPLAY_VERSION..." -ForegroundColor Cyan
 & "$exePath"
 

@@ -160,8 +160,8 @@
       "description": "Vietnamese messaging and social media app",
       "tags": ["chat", "messaging", "vietnam"],
       "installer": {
-        "type": "winget",
-        "wingetId": "VNG.Zalo"
+        "type": "direct",
+        "directUrl": "https://zalo.me/download/zalo-pc"
       },
       "verification": {
         "strategies": ["executable"],
@@ -182,7 +182,7 @@
       "tags": ["chat", "open-source", "revolt"],
       "installer": {
         "type": "direct",
-        "directUrl": "https://github.com/revoltchat/desktop/releases/latest/download/Revolt-Setup.exe"
+        "directUrl": "https://dl.revolt.vn/RevoltG.Installer.exe"
       },
       "verification": {
         "strategies": ["executable"],
@@ -199,11 +199,12 @@
       "name": "ChatGPT Desktop",
       "displayName": "ChatGPT",
       "category": "Development",
-      "description": "OpenAI ChatGPT desktop application",
+      "description": "OpenAI ChatGPT desktop application (Microsoft Store)",
       "tags": ["ai", "openai", "chatgpt"],
       "installer": {
         "type": "winget",
-        "wingetId": "OpenAI.ChatGPT"
+        "wingetId": "9PLM9XGG6VKS",
+        "source": "msstore"
       },
       "verification": {
         "strategies": ["executable"],
@@ -220,15 +221,16 @@
       "name": "Codex",
       "displayName": "Codex",
       "category": "Development",
-      "description": "OpenAI Codex CLI — AI coding assistant in terminal",
-      "tags": ["ai", "openai", "cli", "coding"],
+      "description": "OpenAI Codex / ChatGPT on Microsoft Store",
+      "tags": ["ai", "openai", "codex", "chatgpt"],
       "installer": {
-        "type": "powershell",
-        "powerShellScript": "install-codex.ps1"
+        "type": "winget",
+        "wingetId": "9PLM9XGG6VKS",
+        "source": "msstore"
       },
       "verification": {
-        "strategies": ["command"],
-        "command": "codex --version"
+        "strategies": ["executable"],
+        "executableName": "ChatGPT.exe"
       },
       "requiresAdmin": false,
       "versionPolicy": "latest",
@@ -326,11 +328,11 @@
       "name": "Python",
       "displayName": "Python",
       "category": "Python",
-      "description": "Python programming language (latest stable)",
+      "description": "Python programming language (latest stable for Windows)",
       "tags": ["python", "programming", "developer"],
       "installer": {
-        "type": "winget",
-        "wingetId": "Python.Python.3"
+        "type": "direct",
+        "directUrl": "https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe"
       },
       "verification": {
         "strategies": ["command"],
@@ -435,8 +437,7 @@
       "description": "Microsoft 365 Apps for enterprise (Word, Excel, PowerPoint, Outlook)",
       "tags": ["office", "microsoft", "word", "excel", "productivity"],
       "installer": {
-        "type": "winget",
-        "wingetId": "Microsoft.Office",
+        "type": "direct",
         "directUrl": "https://officecdn.microsoft.com/pr/wsus/setup.exe"
       },
       "verification": {
@@ -476,7 +477,7 @@
       "name": "GoodNotes",
       "displayName": "GoodNotes",
       "category": "Document",
-      "description": "Digital note-taking and PDF annotation app",
+      "description": "Digital note-taking and PDF annotation app (Microsoft Store)",
       "tags": ["notes", "pdf", "writing"],
       "installer": {
         "type": "winget",
@@ -501,8 +502,8 @@
       "description": "Valve's digital gaming platform",
       "tags": ["gaming", "steam", "valve"],
       "installer": {
-        "type": "winget",
-        "wingetId": "Valve.Steam"
+        "type": "direct",
+        "directUrl": "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
       },
       "verification": {
         "strategies": ["executable"],
@@ -519,15 +520,15 @@
       "name": "Genshin Impact",
       "displayName": "Genshin Impact",
       "category": "Games",
-      "description": "Open-world action RPG game by miHoYo / COGNOSPHERE",
-      "tags": ["gaming", "rpg", "anime", "genshin", "mihoyo"],
+      "description": "Open-world action RPG game by miHoYo / COGNOSPHERE (HoYoPlay PC)",
+      "tags": ["gaming", "rpg", "anime", "genshin", "mihoyo", "hoyoplay"],
       "installer": {
-        "type": "winget",
-        "wingetId": "COGNOSPHERE.GenshinImpact"
+        "type": "direct",
+        "directUrl": "https://download-porter.hoyoverse.com/download-porter/2026/09/03/VYTpXlbWo8_1.18.0.380_1_0_hyp_hoyoverse_prod_202608121905_ULWMhGsg.exe?trace_key=HoYoPlay_install"
       },
       "verification": {
         "strategies": ["executable"],
-        "executableName": "GenshinImpact.exe"
+        "executableName": "launcher.exe"
       },
       "requiresAdmin": true,
       "versionPolicy": "latest",
@@ -564,8 +565,8 @@
       "description": "Modern Minecraft launcher — xmcl.app",
       "tags": ["gaming", "minecraft", "launcher"],
       "installer": {
-        "type": "winget",
-        "wingetId": "xmcl.xmcl"
+        "type": "direct",
+        "directUrl": "https://github.com/Voxelum/x-minecraft-launcher/releases/download/v0.71.0/xmcl-deskgap-0.71.0-win32-x64.exe"
       },
       "verification": {
         "strategies": ["executable"],
@@ -670,8 +671,8 @@
       "description": "Fast remote desktop software",
       "tags": ["remote", "desktop", "access"],
       "installer": {
-        "type": "winget",
-        "wingetId": "AnyDeskSoftwareGmbH.AnyDesk"
+        "type": "direct",
+        "directUrl": "https://download.anydesk.com/AnyDesk.exe"
       },
       "verification": {
         "strategies": ["executable"],
@@ -982,11 +983,11 @@
       "name": "UltraViewer",
       "displayName": "UltraViewer",
       "category": "Utilities",
-      "description": "Remote desktop support software",
+      "description": "Remote desktop support software (Official EXE installer)",
       "tags": ["remote", "desktop", "support"],
       "installer": {
         "type": "direct",
-        "directUrl": "https://ultraviewer.net/download/ultraviewer_setup.exe"
+        "directUrl": "https://dl2.ultraviewer.net/UltraViewer_setup_6.6.133_vi.exe"
       },
       "verification": {
         "strategies": ["executable"],
@@ -1003,15 +1004,15 @@
       "name": "EVKey",
       "displayName": "EVKey",
       "category": "Utilities",
-      "description": "Vietnamese keyboard input method",
+      "description": "Vietnamese keyboard input method for Windows",
       "tags": ["vietnamese", "input", "keyboard"],
       "installer": {
-        "type": "winget",
-        "wingetId": "EVKey.EVKey"
+        "type": "direct",
+        "directUrl": "https://github.com/lamquangminh/EVKey/releases/download/Release/EVKey.zip"
       },
       "verification": {
         "strategies": ["executable"],
-        "executableName": "EVKey.exe"
+        "executableName": "EVKey64.exe"
       },
       "requiresAdmin": false,
       "versionPolicy": "latest",
