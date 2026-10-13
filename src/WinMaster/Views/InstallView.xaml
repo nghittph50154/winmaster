@@ -206,21 +206,70 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="12"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Row 0: Custom Install Location Bar -->
-                    <Grid Grid.Row="0">
+                    <!-- Row 0: Chế độ cài đặt & Tải file (Single Selection) -->
+                    <Border Grid.Row="0"
+                            Background="{StaticResource SurfaceElevatedBrush}"
+                            CornerRadius="8"
+                            BorderBrush="{StaticResource BorderSubtleBrush}"
+                            BorderThickness="1"
+                            Padding="14,9">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                                <TextBlock Text="⚙" FontSize="13" Margin="0,0,6,0"/>
+                                <TextBlock Text="Chế độ thực thi:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton Content="⚡ Cài tự động (Silent)"
+                                             IsChecked="{Binding IsSilentMode, Mode=TwoWay}"
+                                             GroupName="InstallModeGroup"
+                                             Foreground="{StaticResource TextPrimaryBrush}"
+                                             FontSize="12"
+                                             FontWeight="SemiBold"
+                                             Margin="0,0,18,0"
+                                             ToolTip="Cài đặt hoàn toàn tự động, im lặng trong nền (không hiện cửa sổ wizard). Phù hợp cài nhanh nhiều app."/>
+
+                                <RadioButton Content="🖥 Hiện Setup Wizard (Interactive)"
+                                             IsChecked="{Binding IsInteractiveMode, Mode=TwoWay}"
+                                             GroupName="InstallModeGroup"
+                                             Foreground="{StaticResource TextPrimaryBrush}"
+                                             FontSize="12"
+                                             FontWeight="SemiBold"
+                                             Margin="0,0,18,0"
+                                             ToolTip="Mở giao diện cài đặt chính thức của phần mềm để tự bấm Next và tùy chọn tính năng."/>
+
+                                <RadioButton Content="💾 Chỉ tải file không cài đặt (Download only)"
+                                             IsChecked="{Binding IsDownloadOnlyMode, Mode=TwoWay}"
+                                             GroupName="InstallModeGroup"
+                                             Foreground="#38BDF8"
+                                             FontSize="12"
+                                             FontWeight="Bold"
+                                             ToolTip="Chỉ tải file cài đặt .exe / .zip về thư mục chỉ định, không cài vào hệ thống."/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 2: Vị trí lưu file exe / cài đặt -->
+                    <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
                             <TextBlock Text="📁" FontSize="13" Margin="0,0,6,0"/>
                             <TextBlock Text="Vị trí lưu file exe:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </StackPanel>
@@ -230,7 +279,7 @@
                                 CornerRadius="6"
                                 BorderBrush="{StaticResource BorderSubtleBrush}"
                                 BorderThickness="1"
-                                Padding="10,4"
+                                Padding="10,5"
                                 Margin="0,0,8,0">
                             <TextBox Text="{Binding CustomInstallPath, UpdateSourceTrigger=PropertyChanged}"
                                      Background="Transparent"
@@ -238,7 +287,7 @@
                                      Foreground="{StaticResource TextPrimaryBrush}"
                                      FontSize="12"
                                      VerticalAlignment="Center"
-                                     ToolTip="Thư mục lưu trữ file cài đặt .exe khi chọn 'Chỉ tải file không cài đặt' (Mặc định: Downloads). Bấm Browse... để đổi."/>
+                                     ToolTip="Thư mục lưu file cài đặt .exe khi chọn 'Chỉ tải file không cài đặt' (Mặc định: Downloads). Bấm Browse... để đổi."/>
                         </Border>
 
                         <Button Grid.Column="2"
@@ -246,47 +295,18 @@
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Command="{Binding BrowseCustomInstallPathCommand}"
                                 Margin="0,0,6,0"
-                                Padding="12,4"/>
+                                Padding="12,5"/>
 
                         <Button Grid.Column="3"
                                 Content="Reset"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Command="{Binding ClearCustomInstallPathCommand}"
-                                Padding="8,4"
+                                Padding="10,5"
                                 ToolTip="Reset về thư mục Downloads mặc định"/>
-
-                        <!-- Single Selection: Chế độ cài đặt & Tải file -->
-                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
-                            <RadioButton Content="⚡ Cài tự động"
-                                         IsChecked="{Binding IsSilentMode, Mode=TwoWay}"
-                                         GroupName="InstallModeGroup"
-                                         Foreground="{StaticResource TextPrimaryBrush}"
-                                         FontSize="12"
-                                         FontWeight="SemiBold"
-                                         Margin="0,0,10,0"
-                                         ToolTip="Cài đặt hoàn toàn tự động, im lặng trong nền."/>
-
-                            <RadioButton Content="🖥 Hiện Setup Wizard"
-                                         IsChecked="{Binding IsInteractiveMode, Mode=TwoWay}"
-                                         GroupName="InstallModeGroup"
-                                         Foreground="{StaticResource TextPrimaryBrush}"
-                                         FontSize="12"
-                                         FontWeight="SemiBold"
-                                         Margin="0,0,10,0"
-                                         ToolTip="Mở cửa sổ cài đặt chính thức của ứng dụng để bấm Next và tùy chỉnh."/>
-
-                            <RadioButton Content="💾 Chỉ tải file không cài đặt"
-                                         IsChecked="{Binding IsDownloadOnlyMode, Mode=TwoWay}"
-                                         GroupName="InstallModeGroup"
-                                         Foreground="#38BDF8"
-                                         FontSize="12"
-                                         FontWeight="Bold"
-                                         ToolTip="Chỉ tải file cài đặt .exe / .zip về thư mục đã chọn mà không chạy cài đặt."/>
-                        </StackPanel>
                     </Grid>
 
-                    <!-- Row 2: Action Controls & RUN Button -->
-                    <Grid Grid.Row="2">
+                    <!-- Row 4: Action Controls & RUN Button -->
+                    <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
