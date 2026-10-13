@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using WinMaster.Infrastructure;
 using WinMaster.Models;
@@ -125,10 +126,39 @@ public class DirectInstaller : IInstaller
         IProgress<string>? outputProgress,
         CancellationToken cancellationToken)
     {
-        var handler = new HttpClientHandler
+        var handler = new SocketsHttpHandler
         {
             CookieContainer = new CookieContainer(),
-            AllowAutoRedirect = true
+            AllowAutoRedirect = true,
+            ConnectCallback = async (context, ct) =>
+            {
+                IPAddress[] addresses;
+                try
+                {
+                    addresses = await Dns.GetHostAddressesAsync(context.DnsEndPoint.Host, ct);
+                }
+                catch
+                {
+                    // Fallback DNS qua DoH (1.1.1.1 / Google DNS) nếu DNS nhà mạng VN chặn tên miền (như Steam)
+                    addresses = await ResolveWithFallbackDnsAsync(context.DnsEndPoint.Host, ct);
+                }
+
+                var socket = new Socket(SocketType.Stream, ProtocolType.Tcp)
+                {
+                    NoDelay = true
+                };
+
+                try
+                {
+                    await socket.ConnectAsync(addresses, context.DnsEndPoint.Port, ct);
+                    return new NetworkStream(socket, ownsSocket: true);
+                }
+                catch
+                {
+                    socket.Dispose();
+                    throw;
+                }
+            }
         };
 
         using var client = new HttpClient(handler)
@@ -410,5 +440,49 @@ public class DirectInstaller : IInstaller
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Phân giải tên miền qua Cloudflare DNS-over-HTTPS (1.1.1.1) khi DNS nhà mạng Việt Nam chặn (như Steam, Discord).
+    /// </summary>
+    private static async Task<IPAddress[]> ResolveWithFallbackDnsAsync(string host, CancellationToken ct)
+    {
+        // IP dự phòng trực tiếp cho Steam CDN nếu DNS hoàn toàn không phản hồi
+        if (host.Contains("steamstatic.com"))
+        {
+            return new[]
+            {
+                IPAddress.Parse("23.49.104.176"),
+                IPAddress.Parse("23.49.104.184"),
+                IPAddress.Parse("23.210.7.177"),
+                IPAddress.Parse("23.210.7.165")
+            };
+        }
+
+        try
+        {
+            using var dohClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+            dohClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/dns-json"));
+            var json = await dohClient.GetStringAsync($"https://1.1.1.1/dns-query?name={Uri.EscapeDataString(host)}&type=A", ct);
+
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("Answer", out var answer) && answer.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                var ips = new List<IPAddress>();
+                foreach (var item in answer.EnumerateArray())
+                {
+                    if (item.TryGetProperty("data", out var dataProp) && IPAddress.TryParse(dataProp.GetString(), out var ip))
+                    {
+                        ips.Add(ip);
+                    }
+                }
+                if (ips.Count > 0) return ips.ToArray();
+            }
+        }
+        catch
+        {
+        }
+
+        throw new SocketException((int)SocketError.HostNotFound);
     }
 }
