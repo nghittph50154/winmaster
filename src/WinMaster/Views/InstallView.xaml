@@ -206,38 +206,42 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="12"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Row 0: Chế độ cài đặt & Tải file (Single Selection) -->
+                    <!-- Row 0: Khung điều khiển hợp nhất (Chế độ thực thi & Vị trí lưu file) -->
                     <Border Grid.Row="0"
                             Background="{StaticResource SurfaceElevatedBrush}"
                             CornerRadius="8"
                             BorderBrush="{StaticResource BorderSubtleBrush}"
                             BorderThickness="1"
-                            Padding="14,9">
+                            Padding="16,12">
                         <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="16"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="155"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                                <TextBlock Text="⚙" FontSize="13" Margin="0,0,6,0"/>
-                                <TextBlock Text="Chế độ thực thi:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <!-- Hàng 1: Chế độ thực thi -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⚙" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Chế độ thực thi:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <UniformGrid Grid.Row="0" Grid.Column="1" Rows="1" Columns="3" VerticalAlignment="Center">
                                 <RadioButton Content="⚡ Cài tự động"
                                              IsChecked="{Binding IsSilentMode, Mode=TwoWay}"
                                              GroupName="InstallModeGroup"
                                              Foreground="{StaticResource TextPrimaryBrush}"
                                              FontSize="12"
                                              FontWeight="SemiBold"
-                                             Margin="0,0,18,0"
+                                             HorizontalAlignment="Center"
                                              ToolTip="Cài đặt hoàn toàn tự động, im lặng trong nền (không hiện cửa sổ wizard)."/>
 
                                 <RadioButton Content="🖥 Hiện Setup"
@@ -246,7 +250,7 @@
                                              Foreground="{StaticResource TextPrimaryBrush}"
                                              FontSize="12"
                                              FontWeight="SemiBold"
-                                             Margin="0,0,18,0"
+                                             HorizontalAlignment="Center"
                                              ToolTip="Mở giao diện cài đặt chính thức của phần mềm để tự bấm Next và tùy chọn tính năng."/>
 
                                 <RadioButton Content="💾 Chỉ tải file"
@@ -255,58 +259,61 @@
                                              Foreground="#38BDF8"
                                              FontSize="12"
                                              FontWeight="Bold"
+                                             HorizontalAlignment="Center"
                                              ToolTip="Chỉ tải file cài đặt .exe / .zip về thư mục chỉ định, không cài vào hệ thống."/>
+                            </UniformGrid>
+
+                            <!-- Đường phân cách giữa 2 hàng -->
+                            <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" Background="{StaticResource BorderSubtleBrush}" VerticalAlignment="Center" Opacity="0.6"/>
+
+                            <!-- Hàng 2: Vị trí lưu file exe -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📁" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Vị trí lưu file exe:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
+
+                            <Grid Grid.Row="2" Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Background="{StaticResource BackgroundBrush}"
+                                        CornerRadius="6"
+                                        BorderBrush="{StaticResource BorderSubtleBrush}"
+                                        BorderThickness="1"
+                                        Padding="10,5"
+                                        Margin="0,0,8,0">
+                                    <TextBox Text="{Binding CustomInstallPath, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Foreground="{StaticResource TextPrimaryBrush}"
+                                             FontSize="12"
+                                             VerticalAlignment="Center"
+                                             ToolTip="Thư mục lưu file cài đặt .exe khi chọn 'Chỉ tải file' (Mặc định: Downloads). Bấm Browse... để đổi."/>
+                                </Border>
+
+                                <Button Grid.Column="1"
+                                        Content="📁 Browse..."
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding BrowseCustomInstallPathCommand}"
+                                        Margin="0,0,6,0"
+                                        Padding="12,5"/>
+
+                                <Button Grid.Column="2"
+                                        Content="Reset"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding ClearCustomInstallPathCommand}"
+                                        Padding="10,5"
+                                        ToolTip="Reset về thư mục Downloads mặc định"/>
+                            </Grid>
                         </Grid>
                     </Border>
 
-                    <!-- Row 2: Vị trí lưu file exe / cài đặt -->
+                    <!-- Row 2: Action Controls & RUN Button -->
                     <Grid Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
-                            <TextBlock Text="📁" FontSize="13" Margin="0,0,6,0"/>
-                            <TextBlock Text="Vị trí lưu file exe:" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        </StackPanel>
-
-                        <Border Grid.Column="1"
-                                Background="{StaticResource SurfaceElevatedBrush}"
-                                CornerRadius="6"
-                                BorderBrush="{StaticResource BorderSubtleBrush}"
-                                BorderThickness="1"
-                                Padding="10,5"
-                                Margin="0,0,8,0">
-                            <TextBox Text="{Binding CustomInstallPath, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     Foreground="{StaticResource TextPrimaryBrush}"
-                                     FontSize="12"
-                                     VerticalAlignment="Center"
-                                     ToolTip="Thư mục lưu file cài đặt .exe khi chọn 'Chỉ tải file không cài đặt' (Mặc định: Downloads). Bấm Browse... để đổi."/>
-                        </Border>
-
-                        <Button Grid.Column="2"
-                                Content="📁 Browse..."
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Command="{Binding BrowseCustomInstallPathCommand}"
-                                Margin="0,0,6,0"
-                                Padding="12,5"/>
-
-                        <Button Grid.Column="3"
-                                Content="Reset"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                Command="{Binding ClearCustomInstallPathCommand}"
-                                Padding="10,5"
-                                ToolTip="Reset về thư mục Downloads mặc định"/>
-                    </Grid>
-
-                    <!-- Row 4: Action Controls & RUN Button -->
-                    <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
