@@ -72,6 +72,9 @@ public partial class InstallViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanRun))]
+    [NotifyPropertyChangedFor(nameof(IsProgressOrSummaryVisible))]
+    [NotifyPropertyChangedFor(nameof(StatusIcon))]
+    [NotifyPropertyChangedFor(nameof(ProgressPercentText))]
     private bool _isRunning;
 
     partial void OnIsRunningChanged(bool value) => RunCommand.NotifyCanExecuteChanged();
@@ -80,13 +83,23 @@ public partial class InstallViewModel : ObservableObject
     private string _currentStatusMessage = "Ready";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressPercentText))]
     private double _overallProgress;
 
     [ObservableProperty]
     private string _sessionSummaryText = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsProgressOrSummaryVisible))]
+    [NotifyPropertyChangedFor(nameof(StatusIcon))]
+    [NotifyPropertyChangedFor(nameof(ProgressPercentText))]
     private bool _showSummary;
+
+    public bool IsProgressOrSummaryVisible => IsRunning || ShowSummary;
+
+    public string StatusIcon => IsRunning ? "⏳" : (ShowSummary ? "✅" : "ℹ");
+
+    public string ProgressPercentText => IsRunning ? $"{Math.Round(OverallProgress)}%" : (ShowSummary ? "100%" : "");
 
     public bool CanRun => !IsRunning && SelectedCount > 0;
 
@@ -237,7 +250,10 @@ public partial class InstallViewModel : ObservableObject
         SessionSummaryText = string.Empty;
         IsRunning = true;
         OverallProgress = 0;
-        CurrentStatusMessage = SelectedInstallMode == InstallMode.DownloadOnly ? "Starting file downloads..." : "Starting installation...";
+        CurrentStatusMessage = SelectedInstallMode == InstallMode.DownloadOnly ? "Đang chuẩn bị tải file..." : "Đang chuẩn bị cài đặt...";
+
+        // Open live PowerShell log window (like WinUtil)
+        _logService.OpenPowerShellWindow();
 
         using var cts = new CancellationTokenSource();
 
@@ -255,10 +271,21 @@ public partial class InstallViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenPowerShellLog()
+    {
+        _logService.OpenPowerShellWindow();
+    }
+
+    [RelayCommand]
+    private void DismissSummary()
+    {
+        ShowSummary = false;
+    }
+
+    [RelayCommand]
     private void CancelRun()
     {
-        // TODO: propagate cancellation token in v1.1
-        CurrentStatusMessage = "Cancelling...";
+        CurrentStatusMessage = "Đang hủy...";
     }
 
     // ─── Engine Event Handlers ───────────────────────────────────────────────
@@ -288,7 +315,7 @@ public partial class InstallViewModel : ObservableObject
             if (card is not null)
             {
                 card.InstallStatus = result.Status;
-                card.StatusMessage = result.IsSuccess ? "Installed" : result.ErrorMessage ?? "Failed";
+                card.StatusMessage = result.IsSuccess ? "Đã cài" : result.ErrorMessage ?? "Thất bại";
             }
         });
     }
@@ -299,23 +326,24 @@ public partial class InstallViewModel : ObservableObject
         {
             IsRunning = false;
             OverallProgress = 100;
-            CurrentStatusMessage = "Installation complete.";
+            CurrentStatusMessage = summary.FailedCount == 0
+                ? $"Hoàn thành ({summary.SuccessCount}/{summary.TotalCount} ứng dụng thành công)"
+                : $"Hoàn thành có lỗi ({summary.SuccessCount} thành công, {summary.FailedCount} lỗi)";
 
             var lines = new List<string>
             {
-                $"Installation complete — {summary.TotalCount} application(s) processed",
-                $"✓ Success: {summary.SuccessCount}",
+                $"✓ Thành công: {summary.SuccessCount} / {summary.TotalCount}",
             };
 
             if (summary.FailedCount > 0)
             {
-                lines.Add($"✗ Failed: {summary.FailedCount}");
+                lines.Add($"✗ Thất bại: {summary.FailedCount}");
                 foreach (var f in summary.FailedResults)
                     lines.Add($"  • {f.ApplicationName}: {f.ErrorMessage}");
             }
 
             if (summary.SkippedCount > 0)
-                lines.Add($"⚠ Skipped: {summary.SkippedCount}");
+                lines.Add($"⚠ Bỏ qua: {summary.SkippedCount}");
 
             SessionSummaryText = string.Join("\n", lines);
             ShowSummary = true;
