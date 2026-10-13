@@ -107,38 +107,70 @@ public partial class TweaksViewModel : ObservableObject
         {
             await Task.Run(() =>
             {
-                ProcessStartInfo psi;
+                var isCmd = SelectedOption.ShellType.Equals("cmd", StringComparison.OrdinalIgnoreCase);
+                string exePath;
+                string arguments;
 
-                if (SelectedOption.ShellType.Equals("cmd", StringComparison.OrdinalIgnoreCase))
+                if (isCmd)
                 {
-                    // Execute CMD elevated safely via PowerShell Start-Process wrapper
-                    var cmdArgs = $"/c {SelectedOption.CommandText}";
-                    psi = new ProcessStartInfo
-                    {
-                        FileName = "powershell.exe",
-                        Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"Start-Process cmd.exe -ArgumentList '{cmdArgs.Replace("'", "''")}' -Verb RunAs\"",
-                        UseShellExecute = true
-                    };
+                    exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+                    if (!File.Exists(exePath)) exePath = "cmd.exe";
+                    arguments = $"/k {SelectedOption.CommandText}";
                 }
                 else
                 {
-                    // Execute via PowerShell with Admin privileges directly via Start-Process
-                    psi = new ProcessStartInfo
-                    {
-                        FileName = "powershell.exe",
-                        Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command \"\"\"{SelectedOption.CommandText.Replace("\"", "`\"")}\"\"\"' -Verb RunAs\"",
-                        UseShellExecute = true
-                    };
+                    exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
+                    if (!File.Exists(exePath)) exePath = "powershell.exe";
+                    arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{SelectedOption.CommandText}\"";
                 }
 
-                using var proc = Process.Start(psi);
-                if (proc is null)
+                // Try Direct process execution first (bypasses ShellExecute token/elevation conflicts)
+                try
                 {
-                    _logService.Error("Không thể khởi chạy tiến trình với quyền Admin.");
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = exePath,
+                        Arguments = arguments,
+                        WorkingDirectory = Path.GetTempPath(),
+                        UseShellExecute = false,
+                        CreateNoWindow = false
+                    };
+
+                    using var proc = Process.Start(psi);
+                    if (proc is not null)
+                    {
+                        _logService.Success($"Đã mở cửa sổ thực thi {SelectedOption.Title} thành công!");
+                        return;
+                    }
                 }
-                else
+                catch
                 {
-                    _logService.Success($"Đã mở cửa sổ thực thi {SelectedOption.Title} thành công!");
+                    // Fallback to ShellExecute
+                }
+
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = exePath,
+                        Arguments = arguments,
+                        WorkingDirectory = Path.GetTempPath(),
+                        UseShellExecute = true
+                    };
+
+                    using var proc = Process.Start(psi);
+                    if (proc is not null)
+                    {
+                        _logService.Success($"Đã mở cửa sổ thực thi {SelectedOption.Title} thành công!");
+                    }
+                    else
+                    {
+                        _logService.Error("Không thể khởi chạy tiến trình.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logService.Error($"Lỗi khi chạy script: {ex.Message}");
                 }
             });
         }

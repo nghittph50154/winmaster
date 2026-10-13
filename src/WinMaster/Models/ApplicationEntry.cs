@@ -65,6 +65,9 @@ public class InstallerConfig
     [JsonPropertyName("storeId")]
     public string? StoreId { get; set; }
 
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
+
     /// <summary>Resolved installer type enum.</summary>
     [JsonIgnore]
     public InstallerType InstallerTypeEnum => Type.ToLowerInvariant() switch

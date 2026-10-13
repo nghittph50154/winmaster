@@ -46,6 +46,8 @@ public partial class ApplicationCardViewModel : ObservableObject
         "python3"           => "🐍",
         "vscode"            => "💙",
         "antigravity"       => "🚀",
+        "antigravity-ide"   => "🚀",
+        "antigravity-2"     => "🚀",
         "notepadplusplus"   => "📝",
         "office365"         => "📊",
         "foxit-reader"      => "📄",
@@ -109,6 +111,12 @@ public partial class ApplicationCardViewModel : ObservableObject
             {
                 if (File.Exists(path))
                     return path;
+            }
+
+            if (_entry.Id.StartsWith("antigravity", StringComparison.OrdinalIgnoreCase))
+            {
+                var fallback = Path.Combine(baseDir, "Assets", "Icons", "antigravity.png");
+                if (File.Exists(fallback)) return fallback;
             }
 
             return null;

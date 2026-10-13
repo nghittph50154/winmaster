@@ -9,6 +9,13 @@ using WinMaster.Services;
 
 namespace WinMaster.ViewModels;
 
+public enum InstallMode
+{
+    Silent,
+    Interactive,
+    DownloadOnly
+}
+
 /// <summary>
 /// ViewModel for the Install menu — the primary view in WinMaster v1.0.
 /// Manages application list, search, selection, and installation orchestration.
@@ -156,14 +163,47 @@ public partial class InstallViewModel : ObservableObject
     private string _customInstallPath = FileSystemHelper.GetDownloadsFolder();
 
     [ObservableProperty]
-    private bool _isInteractiveMode = true;
+    private InstallMode _selectedInstallMode = InstallMode.Silent;
+
+    public bool IsSilentMode
+    {
+        get => SelectedInstallMode == InstallMode.Silent;
+        set { if (value) SelectedInstallMode = InstallMode.Silent; }
+    }
+
+    public bool IsInteractiveMode
+    {
+        get => SelectedInstallMode == InstallMode.Interactive;
+        set { if (value) SelectedInstallMode = InstallMode.Interactive; }
+    }
+
+    public bool IsDownloadOnlyMode
+    {
+        get => SelectedInstallMode == InstallMode.DownloadOnly;
+        set { if (value) SelectedInstallMode = InstallMode.DownloadOnly; }
+    }
+
+    public string RunButtonText => SelectedInstallMode switch
+    {
+        InstallMode.DownloadOnly => "💾  TẢI FILE (DOWNLOAD)",
+        InstallMode.Interactive => "🖥  CHẠY SETUP (WIZARD)",
+        _ => "▶  CÀI TỰ ĐỘNG (INSTALL)"
+    };
+
+    partial void OnSelectedInstallModeChanged(InstallMode value)
+    {
+        OnPropertyChanged(nameof(IsSilentMode));
+        OnPropertyChanged(nameof(IsInteractiveMode));
+        OnPropertyChanged(nameof(IsDownloadOnlyMode));
+        OnPropertyChanged(nameof(RunButtonText));
+    }
 
     [RelayCommand]
     private void BrowseCustomInstallPath()
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = "Select Custom Installation / Download Directory",
+            Title = "Chọn thư mục lưu file cài đặt / thư mục tải xuống",
             Multiselect = false
         };
 
@@ -197,14 +237,16 @@ public partial class InstallViewModel : ObservableObject
         SessionSummaryText = string.Empty;
         IsRunning = true;
         OverallProgress = 0;
-        CurrentStatusMessage = "Starting installation...";
+        CurrentStatusMessage = SelectedInstallMode == InstallMode.DownloadOnly ? "Starting file downloads..." : "Starting installation...";
 
         using var cts = new CancellationTokenSource();
 
         try
         {
             var entries = selected.Select(a => a.Entry).ToList();
-            await _engine.RunAsync(entries, CustomInstallPath, IsInteractiveMode, cts.Token);
+            bool isInteractive = SelectedInstallMode == InstallMode.Interactive;
+            bool isDownloadOnly = SelectedInstallMode == InstallMode.DownloadOnly;
+            await _engine.RunAsync(entries, CustomInstallPath, isInteractive, isDownloadOnly, cts.Token);
         }
         finally
         {

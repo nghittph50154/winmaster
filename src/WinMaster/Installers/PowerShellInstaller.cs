@@ -24,6 +24,7 @@ public class PowerShellInstaller : IInstaller
         ApplicationEntry app,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         IProgress<string>? outputProgress = null,
         CancellationToken cancellationToken = default)
     {
@@ -33,6 +34,16 @@ public class PowerShellInstaller : IInstaller
             ApplicationId = app.Id,
             ApplicationName = app.DisplayName
         };
+
+        if (isDownloadOnly)
+        {
+            outputProgress?.Report($"Chế độ chỉ tải file: Ứng dụng {app.DisplayName} được cài đặt qua PowerShell script.");
+            sw.Stop();
+            result.Duration = sw.Elapsed;
+            result.Status = InstallStatus.Success;
+            result.CompletedAt = DateTime.Now;
+            return result;
+        }
 
         var scriptName = app.Installer.PowerShellScript;
         if (string.IsNullOrWhiteSpace(scriptName))
@@ -111,6 +122,7 @@ public class PendingInstaller : IInstaller
         ApplicationEntry app,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         IProgress<string>? outputProgress = null,
         CancellationToken cancellationToken = default)
     {

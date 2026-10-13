@@ -18,12 +18,13 @@ public class WingetInstaller : IInstaller
     }
 
     public bool CanHandle(ApplicationEntry app)
-        => app.Installer.InstallerTypeEnum == InstallerType.Winget;
+        => app.Installer.InstallerTypeEnum is InstallerType.Winget or InstallerType.Store;
 
     public async Task<InstallResult> InstallAsync(
         ApplicationEntry app,
         string? customInstallPath = null,
         bool isInteractive = false,
+        bool isDownloadOnly = false,
         IProgress<string>? outputProgress = null,
         CancellationToken cancellationToken = default)
     {
@@ -34,40 +35,88 @@ public class WingetInstaller : IInstaller
             ApplicationName = app.DisplayName
         };
 
-        var wingetId = app.Installer.WingetId;
+        var wingetId = !string.IsNullOrWhiteSpace(app.Installer.WingetId)
+            ? app.Installer.WingetId
+            : app.Installer.StoreId;
+
         if (string.IsNullOrWhiteSpace(wingetId))
         {
             result.Status = InstallStatus.Failed;
-            result.ErrorMessage = "No winget package ID configured.";
+            result.ErrorMessage = "No package ID or Store ID configured.";
             sw.Stop();
             result.Duration = sw.Elapsed;
             return result;
         }
 
+        // Check if package is from msstore
+        var isMsStore = string.Equals(app.Installer.Source, "msstore", StringComparison.OrdinalIgnoreCase)
+                     || app.Installer.InstallerTypeEnum == InstallerType.Store
+                     || wingetId.StartsWith("msstore:", StringComparison.OrdinalIgnoreCase);
+
+        if (wingetId.StartsWith("msstore:", StringComparison.OrdinalIgnoreCase))
+        {
+            wingetId = wingetId.Substring("msstore:".Length);
+        }
+
+        var sourceArg = isMsStore ? "--source msstore" : "";
+        var targetDir = !string.IsNullOrWhiteSpace(customInstallPath)
+            ? customInstallPath
+            : FileSystemHelper.GetDownloadsFolder();
+
+        // 1. Download only mode (Chỉ tải file không cài đặt)
+        if (isDownloadOnly)
+        {
+            outputProgress?.Report($"Đang tải gói cài đặt {app.DisplayName} về: {targetDir}...");
+            try { Directory.CreateDirectory(targetDir); } catch { }
+
+            var downloadArgs = $"download --id \"{wingetId}\" {sourceArg} -d \"{targetDir}\" --accept-package-agreements --accept-source-agreements";
+            var psResult = await _psRunner.RunWingetAsync(downloadArgs, cancellationToken, outputProgress);
+
+            sw.Stop();
+            result.Duration = sw.Elapsed;
+            result.ExitCode = psResult.ExitCode;
+            result.CompletedAt = DateTime.Now;
+
+            if (psResult.IsSuccess || psResult.ExitCode == 0)
+            {
+                result.Status = InstallStatus.Success;
+                outputProgress?.Report($"✅ Đã tải file cài đặt {app.DisplayName} vào: {targetDir}");
+            }
+            else
+            {
+                result.Status = InstallStatus.Failed;
+                result.ErrorMessage = string.IsNullOrWhiteSpace(psResult.Error)
+                    ? $"Winget download returned exit code {psResult.ExitCode}"
+                    : psResult.Error.Trim();
+            }
+            return result;
+        }
+
+        // 2. Regular Install mode
         outputProgress?.Report($"Downloading and installing {app.DisplayName} via package manager...");
 
         var modeArgs = isInteractive ? "--interactive" : "--silent --disable-interactivity";
-        var wingetArgs = $"install --id \"{wingetId}\" {modeArgs} --accept-package-agreements --accept-source-agreements";
-        if (!string.IsNullOrWhiteSpace(customInstallPath))
+        var wingetArgs = $"install --id \"{wingetId}\" {sourceArg} {modeArgs} --accept-package-agreements --accept-source-agreements";
+        if (!string.IsNullOrWhiteSpace(customInstallPath) && !isMsStore)
         {
             wingetArgs += $" --location \"{customInstallPath}\"";
             outputProgress?.Report($"Target install location: {customInstallPath}");
         }
-        var psResult = await _psRunner.RunWingetAsync(wingetArgs, cancellationToken, outputProgress);
+        var psInstallResult = await _psRunner.RunWingetAsync(wingetArgs, cancellationToken, outputProgress);
 
         sw.Stop();
         result.Duration = sw.Elapsed;
-        result.ExitCode = psResult.ExitCode;
+        result.ExitCode = psInstallResult.ExitCode;
         result.CompletedAt = DateTime.Now;
 
-        if (psResult.IsSuccess)
+        if (psInstallResult.IsSuccess)
         {
             result.Status = InstallStatus.Installing; // will be updated by verification
         }
         else
         {
             // winget exit code 0x8A15002B = already installed (treat as success)
-            if (psResult.ExitCode == unchecked((int)0x8A15002B))
+            if (psInstallResult.ExitCode == unchecked((int)0x8A15002B))
             {
                 result.Status = InstallStatus.Installing;
                 outputProgress?.Report($"{app.DisplayName} was already installed or is up to date.");
@@ -75,9 +124,9 @@ public class WingetInstaller : IInstaller
             else
             {
                 result.Status = InstallStatus.Failed;
-                result.ErrorMessage = string.IsNullOrWhiteSpace(psResult.Error)
-                    ? $"Package manager returned exit code {psResult.ExitCode}"
-                    : psResult.Error.Trim();
+                result.ErrorMessage = string.IsNullOrWhiteSpace(psInstallResult.Error)
+                    ? $"Package manager returned exit code {psInstallResult.ExitCode}"
+                    : psInstallResult.Error.Trim();
             }
         }
 

@@ -107,6 +107,45 @@ public static class FileSystemHelper
     /// </summary>
     public static string GetTempDownloadPath(string fileName)
         => Path.Combine(GetDownloadsFolder(), fileName);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool DeleteFile(string name);
+
+    /// <summary>
+    /// Removes the Zone.Identifier alternate data stream so Windows doesn't block downloaded executables.
+    /// </summary>
+    public static void UnblockFile(string filePath)
+    {
+        try
+        {
+            if (File.Exists(filePath))
+            {
+                DeleteFile(filePath + ":Zone.Identifier");
+            }
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// Creates a Windows .lnk shortcut file.
+    /// </summary>
+    public static void CreateShortcut(string shortcutPath, string targetPath, string? iconPath = null)
+    {
+        try
+        {
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType == null) return;
+            dynamic shell = Activator.CreateInstance(shellType)!;
+            dynamic shortcut = shell.CreateShortcut(shortcutPath);
+            shortcut.TargetPath = targetPath;
+            shortcut.WorkingDirectory = Path.GetDirectoryName(targetPath) ?? "";
+            if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
+                shortcut.IconLocation = iconPath;
+            shortcut.Save();
+        }
+        catch { }
+    }
 }
 
 /// <summary>
