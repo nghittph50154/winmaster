@@ -53,16 +53,12 @@ function Stop-RunningWinMaster {
     }
 }
 
-function Safe-RemoveDirectory {
+function Clean-AppDirectory {
     param([string]$Path)
+    Stop-RunningWinMaster
     if (Test-Path $Path) {
-        Stop-RunningWinMaster
-        try {
-            Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
-        } catch {
-            Start-Sleep -Milliseconds 800
-            Remove-Item -Path $Path -Recurse -Force -ErrorAction SilentlyContinue
-        }
+        # Chỉ xóa các file và thư mục con bên trong, giữ nguyên thư mục gốc để tránh lỗi khóa thư mục của Windows
+        Get-ChildItem -Path $Path -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -77,12 +73,12 @@ if ((Test-Path $exePath) -and (Test-Path $versionFile)) {
         Write-Host "WinMaster $DISPLAY_VERSION is up to date. Launching..." -ForegroundColor Cyan
     } else {
         Write-Host "Update detected for WinMaster $DISPLAY_VERSION. Downloading update..." -ForegroundColor Yellow
-        Safe-RemoveDirectory $extractPath
+        Clean-AppDirectory $extractPath
         Remove-Item -Path $versionFile, $etagFile -Force -ErrorAction SilentlyContinue
     }
 } elseif (Test-Path $exePath) {
     Write-Host "No version info found. Re-downloading latest WinMaster..." -ForegroundColor Yellow
-    Safe-RemoveDirectory $extractPath
+    Clean-AppDirectory $extractPath
 }
 
 if (-not $needDownload) {
@@ -103,7 +99,7 @@ if ($localZip -and (Test-Path $localZip)) {
 }
 
 Write-Host "Extracting WinMaster..." -ForegroundColor Green
-Safe-RemoveDirectory $extractPath
+Clean-AppDirectory $extractPath
 Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 
 # Unblock all extracted files (remove internet Zone Identifier to allow execution)
