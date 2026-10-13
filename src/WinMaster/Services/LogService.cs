@@ -11,6 +11,7 @@ public class LogService
 {
     private readonly object _lock = new();
     private readonly List<LogEntry> _entries = new();
+    private readonly PowerShellLogViewer _powerShellViewer = new();
 
     public event EventHandler<LogEntry>? EntryAdded;
 
@@ -18,6 +19,14 @@ public class LogService
     public IReadOnlyList<LogEntry> Entries
     {
         get { lock (_lock) return _entries.ToList(); }
+    }
+
+    /// <summary>
+    /// Opens the external live PowerShell log window (similar to WinUtil).
+    /// </summary>
+    public void OpenPowerShellWindow()
+    {
+        _powerShellViewer.EnsureOpen();
     }
 
     public void Log(string message, LogLevel level = LogLevel.Info, string? appId = null)
@@ -35,6 +44,9 @@ public class LogService
             _entries.Add(entry);
         }
 
+        // Stream to external PowerShell log window
+        _powerShellViewer.WriteEntry(entry);
+
         EntryAdded?.Invoke(this, entry);
     }
 
@@ -47,5 +59,6 @@ public class LogService
     public void Clear()
     {
         lock (_lock) { _entries.Clear(); }
+        _powerShellViewer.ResetLog();
     }
 }
