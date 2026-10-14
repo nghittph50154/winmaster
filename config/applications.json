@@ -566,7 +566,7 @@
       "tags": ["gaming", "minecraft", "launcher"],
       "installer": {
         "type": "direct",
-        "directUrl": "https://github.com/Voxelum/x-minecraft-launcher/releases/download/v0.71.0/xmcl-deskgap-0.71.0-win32-x64.exe"
+        "directUrl": "https://github.com/Voxelum/x-minecraft-launcher/releases/download/v0.71.0/xmcl-0.71.0-win32-x64.zip"
       },
       "verification": {
         "strategies": ["executable"],
