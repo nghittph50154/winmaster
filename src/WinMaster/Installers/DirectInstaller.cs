@@ -293,6 +293,13 @@ public class DirectInstaller : IInstaller
                     File.Delete(oldZaloPath);
                 }
             }
+            if (app.Id == "xmcl")
+            {
+                foreach (var oldDeskGap in Directory.GetFiles(targetFolder, "*deskgap*"))
+                {
+                    try { File.Delete(oldDeskGap); } catch { }
+                }
+            }
         }
         catch { }
 
@@ -385,19 +392,61 @@ public class DirectInstaller : IInstaller
                         return await RunExecutableProcess(setupExe, app, result, isInteractive, outputProgress, cancellationToken);
                     }
 
-                    // 2. Look for main application executable (portable app like CapCut)
+                    // 2. Look for main application executable (portable app like CapCut, XMCL)
                     var mainAppExe = exeFiles.FirstOrDefault(f =>
                     {
                         var name = Path.GetFileNameWithoutExtension(f);
                         return name.Equals("CapCut", StringComparison.OrdinalIgnoreCase)
                             || name.Equals(app.DisplayName.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)
-                            || name.Equals(app.Id.Replace("-", ""), StringComparison.OrdinalIgnoreCase);
+                            || name.Equals(app.Id.Replace("-", ""), StringComparison.OrdinalIgnoreCase)
+                            || (!string.IsNullOrWhiteSpace(app.Verification?.ExecutableName) && name.Equals(Path.GetFileNameWithoutExtension(app.Verification.ExecutableName), StringComparison.OrdinalIgnoreCase));
                     });
 
                     if (mainAppExe != null)
                     {
                         outputProgress?.Report($"Portable application ready: {Path.GetFileName(mainAppExe)}");
                         FileSystemHelper.UnblockFile(mainAppExe);
+
+                        // If user did not provide a custom install path, install cleanly to %LocalAppData%\Programs\<AppDisplayName>
+                        if (string.IsNullOrWhiteSpace(customInstallPath))
+                        {
+                            try
+                            {
+                                var programsBase = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs");
+                                Directory.CreateDirectory(programsBase);
+                                var programsDir = Path.Combine(programsBase, app.DisplayName);
+
+                                if (Directory.Exists(programsDir))
+                                {
+                                    try { Directory.Delete(programsDir, true); } catch { }
+                                }
+
+                                if (!Directory.Exists(programsDir))
+                                {
+                                    Directory.Move(extractDir, programsDir);
+                                    var newMainApp = Directory.GetFiles(programsDir, Path.GetFileName(mainAppExe), SearchOption.AllDirectories).FirstOrDefault();
+                                    if (newMainApp != null)
+                                    {
+                                        mainAppExe = newMainApp;
+                                        extractDir = programsDir;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                outputProgress?.Report($"Note: Keeping app at {extractDir} ({ex.Message})");
+                            }
+                        }
+
+                        // Unblock all executables in target dir
+                        try
+                        {
+                            foreach (var exe in Directory.GetFiles(extractDir, "*.exe", SearchOption.AllDirectories))
+                            {
+                                FileSystemHelper.UnblockFile(exe);
+                            }
+                        }
+                        catch { }
 
                         // Create Desktop shortcut
                         try
@@ -409,8 +458,34 @@ public class DirectInstaller : IInstaller
                         }
                         catch { }
 
+                        // Create Start Menu shortcut
+                        try
+                        {
+                            var startMenu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Microsoft\Windows\Start Menu\Programs");
+                            if (Directory.Exists(startMenu))
+                            {
+                                var startShortcut = Path.Combine(startMenu, $"{app.DisplayName}.lnk");
+                                FileSystemHelper.CreateShortcut(startShortcut, mainAppExe);
+                            }
+                        }
+                        catch { }
+
+                        if (isInteractive)
+                        {
+                            try
+                            {
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = mainAppExe,
+                                    WorkingDirectory = Path.GetDirectoryName(mainAppExe) ?? "",
+                                    UseShellExecute = true
+                                });
+                            }
+                            catch { }
+                        }
+
                         result.Status = InstallStatus.Success;
-                        result.VerificationDetail = $"Extracted to {extractDir} (Main app: {Path.GetFileName(mainAppExe)})";
+                        result.VerificationDetail = $"Installed to {extractDir} ({Path.GetFileName(mainAppExe)})";
                         return result;
                     }
 
