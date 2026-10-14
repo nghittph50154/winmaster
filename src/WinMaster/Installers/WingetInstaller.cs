@@ -144,11 +144,6 @@ public class WingetInstaller : IInstaller
 
         var modeArgs = isInteractive ? "--interactive" : "--silent --disable-interactivity";
         var wingetArgs = $"install --id \"{wingetId}\" {sourceArg} {modeArgs} --accept-package-agreements --accept-source-agreements";
-        if (!string.IsNullOrWhiteSpace(customInstallPath) && !isMsStore)
-        {
-            wingetArgs += $" --location \"{customInstallPath}\"";
-            outputProgress?.Report($"Target install location: {customInstallPath}");
-        }
         var psInstallResult = await _psRunner.RunWingetAsync(wingetArgs, cancellationToken, outputProgress);
 
         sw.Stop();
