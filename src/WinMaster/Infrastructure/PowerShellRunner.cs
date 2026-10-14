@@ -83,7 +83,7 @@ public class PowerShellRunner
             return true;
         }
 
-        outputProgress?.Report("⚡ WinGet chưa có sẵn. Đang tự động cài đặt WinGet theo cơ chế WinUtil (Microsoft.WinGet.Client)...");
+        outputProgress?.Report("⚡ WinGet chưa có sẵn. Đang tự động cài đặt WinGet...");
 
         // 1. WinUtil mechanism: Microsoft.WinGet.Client module + Repair-WinGetPackageManager
         var winUtilInstallScript = @"
