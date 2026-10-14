@@ -42,11 +42,9 @@ irm bit.ly/phongvntv | iex
   - 🖥️ **Hiện Setup (Interactive)**: Mở giao diện trình cài đặt (Setup Wizard) để người dùng tự do lựa chọn cấu hình.
   - 💾 **Chỉ tải file (Download Only)**: Chỉ tải file cài đặt gốc (`.exe`, `.msi`, `.zip`, `.appinstaller`) về thư mục người dùng chỉ định mà không chạy cài đặt.
 - **Thư mục lưu trữ riêng biệt**: Ô đường dẫn trên giao diện được tối ưu hóa chuyên biệt cho chế độ *Chỉ tải file*, không can thiệp hay làm lệch đường dẫn cài đặt chuẩn của ứng dụng.
-- **💻 Cửa sổ PowerShell Live Log**: Cửa sổ terminal phụ độc lập hiển thị luồng thông tin chi tiết thời gian thực với định dạng màu sắc trực quan (tương tự Chris Titus WinUtil).
-- **📋 Quản lý nhật ký thông minh & TWEAKS LOG**: 
-  - Bổ sung nút **Xóa log** trực tiếp trên bảng Tweaks.
-  - Tự động làm sạch nhật ký trước mỗi lần bắt đầu tác vụ mới.
-  - Tự động quét và dọn sạch các tệp tin tạm và tệp cấu hình `.yaml` sau phiên cài đặt.
+- **💻 Cửa sổ PowerShell Live Log đồng bộ**: Cửa sổ terminal phụ độc lập hiển thị luồng thông tin chi tiết thời gian thực với định dạng màu sắc trực quan (tương tự Chris Titus WinUtil), có mặt trên cả hai tab INSTALL và TWEAKS, đồng thời **tự động dừng và đóng ngay lập tức khi tắt ứng dụng WinMaster**.
+- **Giao diện tràn viền tối giản (Không còn bảng Log chiếm chỗ)**: Loại bỏ các bảng log nhúng rườm rà ở cả hai tab INSTALL và TWEAKS, mang lại không gian thao tác rộng rãi, thoáng đãng và trực quan.
+- **🧹 Tự động dọn dẹp hệ thống**: Tự động quét và dọn sạch các tệp tin tạm và tệp cấu hình `.yaml` sau mỗi phiên làm việc.
 - **⚙️ TWEAKS Menu**: 
   - Tích hợp công cụ tối ưu hóa hệ thống hàng đầu **WinUtil (Chris Titus Tech)**.
   - Kích hoạt bản quyền Windows & Microsoft Office qua **MAS**.
@@ -129,13 +127,16 @@ powershell -ExecutionPolicy Bypass -File scripts\pack_release.ps1
 ## 📝 Nhật ký thay đổi (Changelog)
 
 ### [v1.1.6] — 14/10/2026 *(Phiên bản hiện tại)*
+- **Loại bỏ hoàn toàn bảng Tweaks Log nhúng trong giao diện:**
+  - Bỏ hẳn cột "TWEAKS LOG" bên phải, đưa giao diện tab TWEAKS về bố cục tràn viền (full-width) sạch sẽ, thoáng đãng và rộng rãi tương tự như tab INSTALL.
+  - Tích hợp nút **"💻 PowerShell Log"** ngay tại thanh công cụ dưới đáy để người dùng có thể tùy ý mở xem nhật ký thời gian thực khi cần.
+- **Tự động tắt PowerShell Log khi tắt WinMaster:**
+  - Đồng bộ chặt chẽ vòng đời của tiến trình PowerShell Activity Log với ứng dụng WinMaster (xử lý sự kiện `MainWindow.Closed`, `App.OnExit`, `ProcessExit` và cơ chế giám sát `ParentPid` ngầm).
+  - Khi người dùng đóng ứng dụng WinMaster, cửa sổ PowerShell Log sẽ lập tức dừng và đóng lại ngay.
 - **Chuẩn hóa thư mục cài đặt mặc định:**
   - Loại bỏ hoàn toàn việc ép cờ `--location` vào trình cài đặt hệ thống của winget.
   - Mọi ứng dụng khi cài đặt (ở cả chế độ *Cài tự động* và *Hiện Setup*) đều cài vào thư mục chuẩn của ứng dụng (`Program Files`, `%LocalAppData%`).
   - Thư mục tùy chỉnh tại ô **"Vị trí lưu file exe:"** được phân định rõ ràng và chỉ áp dụng riêng cho chế độ **"Chỉ tải file"**.
-- **Nâng cấp bảng TWEAKS LOG:**
-  - Bổ sung nút bấm **"Xóa log"** trực tiếp trên thanh tiêu đề bảng nhật ký Tweak.
-  - Tự động làm sạch nhật ký trước mỗi lần khởi chạy script tinh chỉnh hệ thống.
 - **Hỗ trợ tệp gói `.appinstaller`:**
   - Tích hợp bộ parser đọc và giải quyết manifest XML của định dạng `.appinstaller`, tự động tải gói `.msix`/`.appx` và kích hoạt `Add-AppxPackage` mượt mà.
   - Cập nhật **Minecraft X (XMCL)** sang gói `xmcl.appinstaller` chính thức siêu nhẹ, loại bỏ hoàn toàn tình trạng tải nhầm file nén nặng nề.

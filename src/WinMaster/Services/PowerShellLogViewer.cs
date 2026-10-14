@@ -83,8 +83,12 @@ public class PowerShellLogViewer
                 }
             }
 
+            var currentPid = Environment.ProcessId;
             var escapedPath = _logFilePath.Replace("'", "''");
-            var script = $@"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            var script = $@"[CmdletBinding()]
+param([int]$ParentPid = 0)
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Host.UI.RawUI.WindowTitle = 'WinMaster - PowerShell Activity Log'
 Clear-Host
 Write-Host '================================================================' -ForegroundColor Cyan
@@ -92,6 +96,18 @@ Write-Host '               WINMASTER - POWERSHELL ACTIVITY LOG              ' -F
 Write-Host '================================================================' -ForegroundColor Cyan
 Write-Host 'Cua so PowerShell dang lang nghe va hien thi log thoi gian thuc...' -ForegroundColor DarkGray
 Write-Host ''
+
+if ($ParentPid -gt 0) {{
+    $timer = New-Object System.Timers.Timer
+    $timer.Interval = 1000
+    Register-ObjectEvent -InputObject $timer -EventName Elapsed -Action {{
+        $parent = Get-Process -Id $ParentPid -ErrorAction SilentlyContinue
+        if (-not $parent) {{
+            [System.Environment]::Exit(0)
+        }}
+    }} | Out-Null
+    $timer.Start()
+}}
 
 Get-Content -Path '{escapedPath}' -Wait -Tail 30 -Encoding UTF8 | ForEach-Object {{
     if ($_ -match '\[SUCCESS\]|✓|Hoàn thành|Success') {{
@@ -116,7 +132,7 @@ Get-Content -Path '{escapedPath}' -Wait -Tail 30 -Encoding UTF8 | ForEach-Object
             var psi = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptFile}\"",
+                Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptFile}\" -ParentPid {currentPid}",
                 UseShellExecute = true,
                 CreateNoWindow = false,
                 WindowStyle = ProcessWindowStyle.Normal
@@ -127,6 +143,25 @@ Get-Content -Path '{escapedPath}' -Wait -Tail 30 -Encoding UTF8 | ForEach-Object
         catch
         {
             // Fallback: continue silently if PowerShell window cannot be opened
+        }
+    }
+
+    /// <summary>
+    /// Stops and terminates the external PowerShell log viewer process.
+    /// </summary>
+    public void Close()
+    {
+        try
+        {
+            if (_powershellProcess is not null && !_powershellProcess.HasExited)
+            {
+                _powershellProcess.Kill(entireProcessTree: true);
+                _powershellProcess.Dispose();
+                _powershellProcess = null;
+            }
+        }
+        catch
+        {
         }
     }
 }

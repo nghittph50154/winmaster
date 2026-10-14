@@ -9,6 +9,8 @@ namespace WinMaster;
 
 public partial class App : Application
 {
+    private LogService? _logService;
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -16,6 +18,9 @@ public partial class App : Application
         // --- Dependency wiring (simple manual DI — no container needed for v1.0) ---
         var psRunner = new PowerShellRunner();
         var logService = new LogService();
+        _logService = logService;
+        AppDomain.CurrentDomain.ProcessExit += (s, args) => _logService?.ClosePowerShellWindow();
+
         var networkService = new NetworkService();
         var adminService = new AdminService();
         var verificationService = new VerificationService(psRunner);
@@ -56,6 +61,13 @@ public partial class App : Application
 
         var mainVM = new MainViewModel(installVM, tweaksVM);
         var mainWindow = new MainWindow { DataContext = mainVM };
+        mainWindow.Closed += (s, args) => _logService?.ClosePowerShellWindow();
         mainWindow.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _logService?.ClosePowerShellWindow();
+        base.OnExit(e);
     }
 }

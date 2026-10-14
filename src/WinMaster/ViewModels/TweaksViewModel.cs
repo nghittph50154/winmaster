@@ -14,7 +14,6 @@ public partial class TweaksViewModel : ObservableObject
     private readonly LogService _logService;
 
     public ObservableCollection<TweakOptionViewModel> Options { get; } = new();
-    public ObservableCollection<LogEntry> LogEntries { get; } = new();
 
     [ObservableProperty]
     private TweakOptionViewModel? _selectedOption;
@@ -30,8 +29,6 @@ public partial class TweaksViewModel : ObservableObject
     public TweaksViewModel(LogService logService)
     {
         _logService = logService;
-        _logService.EntryAdded += OnLogEntryAdded;
-
         InitializeOptions();
     }
 
@@ -91,17 +88,15 @@ public partial class TweaksViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void ClearLog()
+    private void OpenPowerShellLog()
     {
-        LogEntries.Clear();
+        _logService.OpenPowerShellWindow();
     }
 
     [RelayCommand(CanExecute = nameof(CanRun))]
     private async Task RunAsync()
     {
         if (SelectedOption is null) return;
-
-        LogEntries.Clear();
 
         IsRunning = true;
         CurrentStatusMessage = $"Đang khởi chạy {SelectedOption.Title}...";
@@ -193,13 +188,5 @@ public partial class TweaksViewModel : ObservableObject
             OnPropertyChanged(nameof(CanRun));
             RunCommand.NotifyCanExecuteChanged();
         }
-    }
-
-    private void OnLogEntryAdded(object? sender, LogEntry entry)
-    {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            LogEntries.Add(entry);
-        });
     }
 }

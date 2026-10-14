@@ -61,4 +61,12 @@ public class LogService
         lock (_lock) { _entries.Clear(); }
         _powerShellViewer.ResetLog();
     }
+
+    /// <summary>
+    /// Stops and terminates the external PowerShell log window if it is open.
+    /// </summary>
+    public void ClosePowerShellWindow()
+    {
+        _powerShellViewer.Close();
+    }
 }
