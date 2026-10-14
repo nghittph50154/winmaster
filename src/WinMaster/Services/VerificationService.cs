@@ -44,6 +44,7 @@ public class VerificationService
                     "registry" => TryRegistryVerification(app),
                     "executable" => TryExecutableVerification(app),
                     "path" => TryPathVerification(app),
+                    "package" or "appx" => await TryPackageVerification(app),
                     _ => null
                 };
 
@@ -157,6 +158,23 @@ public class VerificationService
         {
             var path = Environment.ExpandEnvironmentVariables(app.Verification.InstallPath);
             return File.Exists(path) || Directory.Exists(path);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private async Task<bool?> TryPackageVerification(ApplicationEntry app)
+    {
+        var pkgName = !string.IsNullOrWhiteSpace(app.Verification.PackageName)
+            ? app.Verification.PackageName
+            : app.Id;
+
+        try
+        {
+            var psResult = await _psRunner.RunCommandAsync($"if (Get-AppxPackage -Name '*{pkgName}*') {{ 'Installed' }}");
+            return psResult.IsSuccess && psResult.Output.Contains("Installed");
         }
         catch
         {

@@ -74,7 +74,7 @@ public static class FileSystemHelper
             ".tar" => FileCategory.Archive,
             ".gz" => FileCategory.Archive,
             ".cab" => FileCategory.Cabinet,
-            ".appx" or ".appxbundle" or ".msix" => FileCategory.StorePackage,
+            ".appx" or ".appxbundle" or ".msix" or ".msixbundle" or ".appinstaller" => FileCategory.StorePackage,
             _ => FileCategory.Unknown
         };
     }
