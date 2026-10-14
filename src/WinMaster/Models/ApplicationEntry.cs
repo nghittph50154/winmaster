@@ -33,6 +33,7 @@ public enum VerificationStrategy
     Registry,
     Command,
     Path,
+    Package,
     None
 }
 
@@ -97,6 +98,9 @@ public class VerificationConfig
 
     [JsonPropertyName("executableName")]
     public string? ExecutableName { get; set; }
+
+    [JsonPropertyName("packageName")]
+    public string? PackageName { get; set; }
 
     [JsonPropertyName("installPath")]
     public string? InstallPath { get; set; }

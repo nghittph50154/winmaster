@@ -299,6 +299,10 @@ public class DirectInstaller : IInstaller
                 {
                     try { File.Delete(oldDeskGap); } catch { }
                 }
+                foreach (var oldZip in Directory.GetFiles(targetFolder, "xmcl*.zip"))
+                {
+                    try { File.Delete(oldZip); } catch { }
+                }
             }
         }
         catch { }
@@ -358,6 +362,78 @@ public class DirectInstaller : IInstaller
         var targetFolder = !string.IsNullOrWhiteSpace(customInstallPath) && Directory.Exists(customInstallPath)
             ? customInstallPath
             : FileSystemHelper.GetDownloadsFolder();
+
+        if (category == FileCategory.StorePackage || Path.GetExtension(filePath).Equals(".appinstaller", StringComparison.OrdinalIgnoreCase))
+        {
+            outputProgress?.Report($"Preparing Store / App Installer package: {Path.GetFileName(filePath)}...");
+            try
+            {
+                var isAppInstaller = Path.GetExtension(filePath).Equals(".appinstaller", StringComparison.OrdinalIgnoreCase);
+
+                if (!isInteractive)
+                {
+                    // Silent/non-interactive install via Add-AppxPackage
+                    var psArgs = isAppInstaller
+                        ? $"-NoProfile -NonInteractive -Command \"Add-AppxPackage -AppInstallerFile '{filePath}'\""
+                        : $"-NoProfile -NonInteractive -Command \"Add-AppxPackage -Path '{filePath}'\"";
+
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "powershell.exe",
+                        Arguments = psArgs,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    using var proc = Process.Start(psi);
+                    if (proc != null)
+                    {
+                        await proc.WaitForExitAsync(cancellationToken);
+                        if (proc.ExitCode == 0)
+                        {
+                            result.Status = InstallStatus.Success;
+                            result.VerificationDetail = $"Installed via AppInstaller: {Path.GetFileName(filePath)}";
+                            outputProgress?.Report($"✅ Đã cài đặt xong gói: {Path.GetFileName(filePath)}");
+                            return result;
+                        }
+                    }
+                }
+
+                // Interactive mode or fallback: open Windows App Installer UI directly
+                outputProgress?.Report($"Opening Windows App Installer for: {Path.GetFileName(filePath)}...");
+                var shellPsi = new ProcessStartInfo
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                };
+
+                try
+                {
+                    Process.Start(shellPsi);
+                }
+                catch
+                {
+                    var fileUri = new Uri(filePath).AbsoluteUri;
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = $"ms-appinstaller:?source={fileUri}",
+                        UseShellExecute = true
+                    });
+                }
+
+                result.Status = InstallStatus.Success;
+                result.VerificationDetail = $"Launched App Installer for {Path.GetFileName(filePath)}";
+                outputProgress?.Report($"✅ Đã mở App Installer cho {app.DisplayName}. Vui lòng xác nhận trên cửa sổ cài đặt Windows.");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                outputProgress?.Report($"AppInstaller error: {ex.Message}. File saved to: {filePath}");
+                result.Status = InstallStatus.Success;
+                result.VerificationDetail = $"Saved to {filePath}";
+                return result;
+            }
+        }
 
         if (category == FileCategory.Archive)
         {

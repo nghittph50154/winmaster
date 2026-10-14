@@ -562,14 +562,15 @@
       "name": "Minecraft X",
       "displayName": "Minecraft X",
       "category": "Games",
-      "description": "Modern Minecraft launcher — xmcl.app",
+      "description": "Modern Minecraft launcher — xmcl.app (App Installer)",
       "tags": ["gaming", "minecraft", "launcher"],
       "installer": {
         "type": "direct",
-        "directUrl": "https://github.com/Voxelum/x-minecraft-launcher/releases/download/v0.71.0/xmcl-0.71.0-win32-x64.zip"
+        "directUrl": "https://xmcl.blob.core.windows.net/releases/xmcl.appinstaller"
       },
       "verification": {
-        "strategies": ["executable"],
+        "strategies": ["package", "executable"],
+        "packageName": "XMCL",
         "executableName": "xmcl.exe"
       },
       "requiresAdmin": false,
