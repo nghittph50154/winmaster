@@ -90,10 +90,18 @@ public partial class TweaksViewModel : ObservableObject
         RunCommand.NotifyCanExecuteChanged();
     }
 
+    [RelayCommand]
+    public void ClearLog()
+    {
+        LogEntries.Clear();
+    }
+
     [RelayCommand(CanExecute = nameof(CanRun))]
     private async Task RunAsync()
     {
         if (SelectedOption is null) return;
+
+        LogEntries.Clear();
 
         IsRunning = true;
         CurrentStatusMessage = $"Đang khởi chạy {SelectedOption.Title}...";

@@ -17,8 +17,8 @@
 
 [CmdletBinding()]
 param(
-    [string]$RepoOwner   = "YOUR_USERNAME",   # Replace with your GitHub username
-    [string]$RepoName    = "WinMaster",
+    [string]$RepoOwner   = "nghittph50154",
+    [string]$RepoName    = "winmaster",
     [string]$Branch      = "main",
     [string]$ReleaseTag  = "latest"
 )
@@ -41,7 +41,7 @@ Write-Host "  ██║███╗██║██║██║╚██╗██
 Write-Host "  ╚███╔███╔╝██║██║ ╚████║██║ ╚═╝ ██║██║  ██║███████║   ██║   ███████╗██║  ██║" -ForegroundColor Cyan
 Write-Host "   ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  WinMaster v1.0.0 — Windows Software Installer" -ForegroundColor White
+Write-Host "  WinMaster v1.1.6 — Windows Software Installer" -ForegroundColor White
 Write-Host "  Repository: $RepoOwner/$RepoName" -ForegroundColor DarkGray
 Write-Host ""
 

@@ -1,283 +1,217 @@
 # WinMaster
 
 <div align="center">
-  <h1>🔧 WinMaster v1.1.5</h1>
+  <h1>🔧 WinMaster v1.1.6</h1>
   <p><strong>Windows Utility & Software Installer</strong></p>
   <p><em>TICK → RUN → DONE</em></p>
   
-  ![Version](https://img.shields.io/badge/version-1.1.5-6C63FF?style=flat-square)
+  ![Version](https://img.shields.io/badge/version-1.1.6-6C63FF?style=flat-square)
   ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
   ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square)
   ![WPF](https://img.shields.io/badge/UI-WPF-0078D4?style=flat-square)
+  ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 </div>
 
 ---
 
 ## What is WinMaster?
 
-WinMaster is a personal Windows software installer and utility tool. It lets you set up a fresh Windows installation in minutes — just tick what you need and hit RUN.
+**WinMaster** là công cụ cài đặt phần mềm và tiện ích tối ưu hóa hệ thống tất-cả-trong-một (All-in-One) dành cho Windows. Giúp bạn cài đặt đầy đủ các ứng dụng thiết yếu cho một máy tính mới chỉ trong vài phút — chỉ cần tích chọn những phần mềm cần dùng và bấm **RUN**.
 
-**Philosophy:** The user should never need to understand *how* an app is installed — only *that* it's installed. All backend complexity (winget, direct downloads, PowerShell, verification) is hidden behind a clean, modern interface.
-
----
-
-## Features
-
-- **60+ curated applications** across 10+ categories (Browsers, Communications, Development, Document, Games, Utilities, Media, Drivers, etc.)
-- **3 Execution Modes** (Single Selection):
-  - ⚡ **Cài tự động (Silent)**: Tự động tải và cài đặt im lặng vào máy
-  - 🖥️ **Hiện Setup (Interactive)**: Hiện giao diện wizard của phần mềm để tùy biến
-  - 💾 **Chỉ tải file thôi (Download Only)**: Chỉ tải file cài đặt `.exe`/`.msi` về máy mà không cài
-- **Custom Download Location**: Tùy chọn thư mục lưu trữ file cài đặt riêng biệt
-- **PowerShell Activity Log Window**: Cửa sổ console PowerShell riêng biệt hiển thị log chi tiết thời gian thực với màu sắc chuẩn trực quan
-- **WinUtil-style Status & Progress Bar**: Thanh tiến độ tinh gọn và thông báo tóm tắt kết quả ở thanh đáy
-- **Auto-clean Manifest Files**: Tự động dọn dẹp các file `.yaml` rác sau khi tải gói winget
-- **Dark premium UI** — giao diện rộng tràn viền, hiện đại, mượt mà
-- **Search & Filter** — tìm kiếm ứng dụng tức thì
-- **Select All / Clear** — thao tác hàng loạt
-- **Sequential installation** — cài đặt tuần tự an toàn, lỗi không chặn các ứng dụng khác
-- **Tweaks Menu (v1.1)** — tối ưu hóa Windows, gỡ bỏ Bloatware, tinh chỉnh giao diện, kích hoạt bản quyền Windows / Office / IDM
-- **WinPE Menu (dự kiến v1.2)** — bộ công cụ cứu hộ và cài lại máy
-- **One-click Launcher** — chạy trực tiếp qua PowerShell: `powershell -ExecutionPolicy Bypass -File .\run.ps1`
+**Triết lý thiết kế:** Người dùng không cần phải bận tâm *làm cách nào* để tải hay cài đặt một phần mềm — chỉ cần biết rằng phần mềm đó *đã được cài đặt thành công*. Mọi sự phức tạp ở tầng hệ thống (winget, direct downloads, AppInstaller, PowerShell scripts, kiểm tra tính toàn vẹn) đều được xử lý mượt mà đằng sau giao diện Dark UI hiện đại.
 
 ---
 
-## Screenshots
+## ⚡ Cài đặt nhanh (Quick Launch)
 
-> Coming soon — build and run WinMaster to see the UI.
+Mở PowerShell (Windows Terminal hoặc PowerShell) và dán lệnh sau để tải và khởi chạy WinMaster ngay lập tức:
 
----
-
-## Architecture
-
-```
-WinMaster/
-├── src/WinMaster/
-│   ├── Models/          ← ApplicationEntry, InstallResult, LogEntry
-│   ├── ViewModels/      ← MainViewModel, InstallViewModel, ApplicationCardViewModel
-│   ├── Views/           ← MainWindow, InstallView, PlaceholderView
-│   ├── Services/        ← AppRegistryService, InstallerEngine, VerificationService, ...
-│   ├── Installers/      ← WingetInstaller, DirectInstaller, FixedSourceInstaller, ...
-│   ├── Infrastructure/  ← PowerShellRunner, FileSystemHelper
-│   ├── Converters/      ← WPF value converters
-│   └── Themes/          ← Colors.xaml, Controls.xaml
-│
-├── config/
-│   └── applications.json   ← Application registry (the single source of truth)
-│
-├── scripts/
-│   ├── install.ps1         ← Remote entry point (irm | iex)
-│   ├── applications/       ← Per-app PowerShell installers
-│   ├── utilities/          ← Helper scripts
-│   └── system/             ← System setup scripts
-│
-├── sources/
-│   ├── python/             ← Fixed Python installer (user provided)
-│   ├── capcut/             ← Fixed CapCut versions (user provided)
-│   └── drivers/            ← Fixed driver packages (user provided)
-│
-└── docs/                   ← Documentation
-```
-
----
-
-## Requirements
-
-- **OS:** Windows 10 (1809+) or Windows 11
-- **Runtime:** .NET 10 (included in published self-contained build)
-- **winget:** Windows Package Manager (pre-installed on Windows 11, available for Win10)
-- **Internet:** Required for most app installations
-
----
-
-## Installation
-
-### Option 1: Direct Download
-Download `WinMaster.exe` from the [Releases](https://github.com/YOUR_USERNAME/WinMaster/releases) page and run it.
-
-### Option 2: Remote PowerShell (irm | iex)
 ```powershell
 irm bit.ly/phongvntv | iex
 ```
 
-> ⚠️ **Security note:** Only run this from the official WinMaster repository. Never pipe unknown scripts to `iex`.
+> 💡 **Mẹo:** Lệnh trên sẽ tự động kiểm tra phiên bản mới nhất từ kho lưu trữ chính thức, tự tải về bộ cài đặt được tối ưu và khởi động ứng dụng với đầy đủ quyền hệ thống.
 
 ---
 
-## Development Setup
+## ✨ Tính năng nổi bật
 
-### Prerequisites
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- Windows (WPF requires Windows)
-- Visual Studio 2022 or VS Code with C# extension
+- **Hơn 60+ ứng dụng chọn lọc hàng đầu** thuộc các danh mục: Trình duyệt, Liên lạc, Lập trình, Soạn thảo văn phòng, Game & Giải trí, Tiện ích, Media, Drivers...
+- **3 Chế độ thực thi linh hoạt** (Single Selection):
+  - ⚡ **Cài tự động (Silent)**: Tự động tải và cài đặt im lặng vào máy theo thư mục chuẩn của hệ thống (`Program Files`, `%LocalAppData%`).
+  - 🖥️ **Hiện Setup (Interactive)**: Mở giao diện trình cài đặt (Setup Wizard) để người dùng tự do lựa chọn cấu hình.
+  - 💾 **Chỉ tải file (Download Only)**: Chỉ tải file cài đặt gốc (`.exe`, `.msi`, `.zip`, `.appinstaller`) về thư mục người dùng chỉ định mà không chạy cài đặt.
+- **Thư mục lưu trữ riêng biệt**: Ô đường dẫn trên giao diện được tối ưu hóa chuyên biệt cho chế độ *Chỉ tải file*, không can thiệp hay làm lệch đường dẫn cài đặt chuẩn của ứng dụng.
+- **💻 Cửa sổ PowerShell Live Log**: Cửa sổ terminal phụ độc lập hiển thị luồng thông tin chi tiết thời gian thực với định dạng màu sắc trực quan (tương tự Chris Titus WinUtil).
+- **📋 Quản lý nhật ký thông minh & TWEAKS LOG**: 
+  - Bổ sung nút **Xóa log** trực tiếp trên bảng Tweaks.
+  - Tự động làm sạch nhật ký trước mỗi lần bắt đầu tác vụ mới.
+  - Tự động quét và dọn sạch các tệp tin tạm và tệp cấu hình `.yaml` sau phiên cài đặt.
+- **⚙️ TWEAKS Menu**: 
+  - Tích hợp công cụ tối ưu hóa hệ thống hàng đầu **WinUtil (Chris Titus Tech)**.
+  - Kích hoạt bản quyền Windows & Microsoft Office qua **MAS**.
+  - Kích hoạt và cập nhật bản quyền Internet Download Manager (IDM) qua **IAS**.
+  - Tự động kích hoạt bản quyền WinRAR chỉ với 1 cú click.
+- **Giao diện Dark Theme cao cấp**: Tràn viền, bo góc hiện đại, tối ưu không gian hiển thị, hiệu ứng chuyển động mượt mà.
+- **Tìm kiếm & Bộ lọc tức thì**: Tìm nhanh ứng dụng theo tên, mô tả hoặc tag.
+- **Cài đặt tuần tự (Sequential Installation)**: Tiến trình chạy lần lượt an toàn, nếu một ứng dụng gặp sự cố sẽ không làm gián đoạn các ứng dụng còn lại.
+- **Hỗ trợ định dạng gói ứng dụng hiện đại**: Hỗ trợ `.exe`, `.msi`, `.zip`, `.appinstaller`, `.msixbundle`.
 
-### Clone and Build
-```bash
-git clone https://github.com/YOUR_USERNAME/WinMaster.git
-cd WinMaster
-dotnet build src/WinMaster/WinMaster.csproj
+---
+
+## 🏛️ Cấu trúc dự án (Architecture)
+
+```
+WinMaster/
+├── src/WinMaster/
+│   ├── Models/          ← ApplicationEntry, InstallResult, LogEntry, TweakOption
+│   ├── ViewModels/      ← MainViewModel, InstallViewModel, TweaksViewModel, ...
+│   ├── Views/           ← MainWindow, InstallView, TweaksView, PlaceholderView
+│   ├── Services/        ← AppRegistryService, InstallerEngine, VerificationService, LogService
+│   ├── Installers/      ← WingetInstaller, DirectInstaller, FixedSourceInstaller
+│   ├── Infrastructure/  ← PowerShellRunner, FileSystemHelper
+│   ├── Converters/      ← WPF Value Converters
+│   └── Themes/          ← Colors.xaml, Controls.xaml
+│
+├── config/
+│   └── applications.json   ← Cơ sở dữ liệu danh mục phần mềm (Single Source of Truth)
+│
+├── publish_out/
+│   └── WinMaster.zip       ← Gói ứng dụng biên dịch sẵn phục vụ cài đặt nhanh
+│
+├── scripts/
+│   ├── install.ps1         ← Script cài đặt từ xa chính thức
+│   ├── pack_release.ps1    ← Script đóng gói WinMaster.zip tự động
+│   └── winrar.ps1          ← Script kích hoạt bản quyền WinRAR
+│
+├── sources/                ← Nguồn cài đặt cố định ngoại tuyến (Python, CapCut, Drivers...)
+├── run.ps1                 ← Script khởi chạy và tự động cập nhật WinMaster
+└── README.md               ← Tài liệu hướng dẫn sử dụng và lịch sử phiên bản
 ```
 
-### Run in Development
+---
+
+## 📋 Yêu cầu hệ thống
+
+- **Hệ điều hành:** Windows 10 (bản 1809 trở lên) hoặc Windows 11 (khuyên dùng).
+- **Nền tảng thực thi:** Đã tích hợp sẵn .NET 10 runtime trong gói self-contained, không cần cài đặt thêm runtime bên ngoài.
+- **Trình quản lý gói:** Hỗ trợ tốt nhất khi có `winget` (mặc định có sẵn trên Windows 11 và Windows 10 mới).
+- **Kết nối mạng:** Kết nối Internet ổn định để tải phần mềm.
+
+---
+
+## 🛠️ Hướng dẫn phát triển & Biên dịch
+
+### Chuẩn bị môi trường
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- Visual Studio 2022 / VS Code với C# Dev Kit
+- Hệ điều hành Windows (WPF yêu cầu môi trường Windows)
+
+### Clone và chạy thử
 ```bash
+git clone https://github.com/nghittph50154/winmaster.git
+cd winmaster
+dotnet build src/WinMaster/WinMaster.csproj
 dotnet run --project src/WinMaster/WinMaster.csproj
 ```
 
----
-
-## Build
-
-### Debug Build
-```bash
-dotnet build src/WinMaster/WinMaster.csproj
-```
-
-### Release Build (Single EXE)
-```bash
-dotnet publish src/WinMaster/WinMaster.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/
-```
-
----
-
-## PowerShell Scripts
-
-### Organization
-```
-scripts/
-├── install.ps1                  ← Remote installer entry point
-├── applications/
-│   ├── install-codex.ps1        ← OpenAI Codex CLI (via npm)
-│   └── ...
-├── utilities/
-│   └── ...
-└── system/
-    └── ...
-```
-
-### Remote Entry Point
-The `scripts/install.ps1` file is the entry point for remote installation:
+### Đóng gói bản phát hành (Publish & Package)
 ```powershell
-irm https://raw.githubusercontent.com/YOUR_USERNAME/WinMaster/main/scripts/install.ps1 | iex
+# 1. Xuất bản ứng dụng tự chứa (Self-contained)
+dotnet publish src/WinMaster/WinMaster.csproj -c Release -r win-x64 --self-contained true -o publish_out/
+
+# 2. Đóng gói vào WinMaster.zip
+powershell -ExecutionPolicy Bypass -File scripts\pack_release.ps1
 ```
 
-To change the remote URL, update `remoteBaseUrl` in `config/applications.json`.
+---
+
+## 📝 Nhật ký thay đổi (Changelog)
+
+### [v1.1.6] — 14/10/2026 *(Phiên bản hiện tại)*
+- **Chuẩn hóa thư mục cài đặt mặc định:**
+  - Loại bỏ hoàn toàn việc ép cờ `--location` vào trình cài đặt hệ thống của winget.
+  - Mọi ứng dụng khi cài đặt (ở cả chế độ *Cài tự động* và *Hiện Setup*) đều cài vào thư mục chuẩn của ứng dụng (`Program Files`, `%LocalAppData%`).
+  - Thư mục tùy chỉnh tại ô **"Vị trí lưu file exe:"** được phân định rõ ràng và chỉ áp dụng riêng cho chế độ **"Chỉ tải file"**.
+- **Nâng cấp bảng TWEAKS LOG:**
+  - Bổ sung nút bấm **"Xóa log"** trực tiếp trên thanh tiêu đề bảng nhật ký Tweak.
+  - Tự động làm sạch nhật ký trước mỗi lần khởi chạy script tinh chỉnh hệ thống.
+- **Hỗ trợ tệp gói `.appinstaller`:**
+  - Tích hợp bộ parser đọc và giải quyết manifest XML của định dạng `.appinstaller`, tự động tải gói `.msix`/`.appx` và kích hoạt `Add-AppxPackage` mượt mà.
+  - Cập nhật **Minecraft X (XMCL)** sang gói `xmcl.appinstaller` chính thức siêu nhẹ, loại bỏ hoàn toàn tình trạng tải nhầm file nén nặng nề.
+- **Tối ưu hóa Launcher:**
+  - Cập nhật launcher một dòng lệnh duy nhất: `irm bit.ly/phongvntv | iex`.
+  - Khắc phục triệt để lỗi khóa tệp (`IOException: Access Denied`) khi launcher cập nhật phiên bản mới đè lên thư mục đang chạy.
 
 ---
 
-## How to Use
-
-1. Launch `WinMaster.exe`
-2. Click **INSTALL** (default menu)
-3. Browse categories or use the **Search** bar
-4. **Tick** the applications you want
-5. Click **RUN INSTALLATION**
-6. Watch the log panel — WinMaster handles everything
-7. Review the summary when complete
-
----
-
-## How to Add an Application
-
-Edit `config/applications.json` and add an entry:
-
-```json
-{
-  "id": "my-app",
-  "name": "My App",
-  "displayName": "My App",
-  "category": "Utilities",
-  "description": "Description of my app",
-  "tags": ["tag1", "tag2"],
-  "installer": {
-    "type": "winget",
-    "wingetId": "Publisher.MyApp"
-  },
-  "verification": {
-    "strategies": ["command"],
-    "command": "myapp --version"
-  },
-  "requiresAdmin": false,
-  "versionPolicy": "latest",
-  "status": "stable"
-}
-```
-
-**Installer types:**
-| Type | Description |
-|------|-------------|
-| `winget` | Windows Package Manager (recommended) |
-| `direct` | Direct download from official URL |
-| `fixed` | From `sources/` directory |
-| `powershell` | Custom PowerShell script |
-| `store` | Microsoft Store |
-| `pending` | Not yet configured |
+### [v1.1.5] — 14/10/2026
+- **3 Chế độ thực thi phần mềm độc lập:**
+  - Bổ sung thanh chọn chế độ: *⚡ Cài tự động*, *🖥️ Hiện Setup*, *💾 Chỉ tải file*.
+  - Cho phép chọn thư mục lưu trữ file cài đặt tải về cho người dùng thích lưu trữ bộ cài offline.
+- **Cửa sổ PowerShell Live Log thời gian thực:**
+  - Tích hợp cửa sổ dòng lệnh PowerShell stream toàn bộ tiến trình cài đặt với mã màu chuyên nghiệp tương tự WinUtil.
+- **Tự động làm sạch tệp tin rác:**
+  - Tự động quét và xóa sạch các tệp cấu hình `.yaml` sinh ra trong quá trình winget tải manifest.
+- **Nâng cấp toàn diện 13 phần mềm cốt lõi:**
+  - **Zalo PC**: Chuyển sang nguồn tải trực tiếp chuẩn `https://zalo.me/download/zalo-pc`, lưu đúng định dạng `.exe`.
+  - **Steam**: Thêm cơ chế dự phòng tải trực tiếp từ CDN khi DNS bị chặn.
+  - **Genshin Impact**: Nâng cấp sang trình khởi chạy hợp nhất HoYoPlay PC chính thức.
+  - **Office 365, Python, AnyDesk, UltraViewer, EVKey, RevoltG**: Cập nhật link tải và cơ chế cài đặt mới nhất.
+  - **ChatGPT, Codex, GoodNotes**: Tích hợp sâu vào Microsoft Store qua Winget msstore source.
 
 ---
 
-## How to Add a Fixed Source
-
-1. Add your file to the appropriate `sources/` subdirectory:
-   ```
-   sources/
-   ├── python/         ← Python-3.12.8.exe
-   ├── capcut/         ← CapCut-1.5.exe, CapCut-7.0.exe, ...
-   └── drivers/        ← YINDIAO-G17-Drive.zip, ...
-   ```
-
-2. Add an entry to `applications.json` with `"type": "fixed"`:
-   ```json
-   "installer": {
-     "type": "fixed",
-     "sourceDir": "sources/python",
-     "expectedPattern": "Python-3.12.8"
-   }
-   ```
-
-3. WinMaster will find the file by pattern match — **file extension is detected at runtime**, never assumed.
-
-> **Important:** If the source file is not found, WinMaster shows a clear error. It will NOT substitute a different version.
+### [v1.1.0 – v1.1.4] — 13/10/2026
+- **Ra mắt Menu TWEAKS & ACTIVATION:**
+  - Bổ sung công cụ tinh chỉnh hệ thống Chris Titus WinUtil.
+  - Tích hợp công cụ kích hoạt bản quyền mã nguồn mở MAS (Windows/Office) và IAS (IDM).
+  - Tích hợp script tự động kích hoạt WinRAR bằng registry key bản quyền.
+- **Cải tiến giao diện & Điều hướng:**
+  - Nâng cấp giao diện Dark Theme tràn viền cao cấp.
+  - Thêm thanh tìm kiếm ứng dụng tức thì và bộ lọc theo nhóm danh mục.
+  - Bổ sung các phím thao tác nhanh *Select All* và *Clear*.
+- **Tự động nâng quyền Administrator:**
+  - Ứng dụng tự động phát hiện và kích hoạt chế độ quản trị viên khi cần thực thi các tác vụ hệ thống.
 
 ---
 
-## Security Notes
-
-- WinMaster only executes scripts from within its own repository
-- `irm | iex` downloads from the **official WinMaster GitHub repository** only
-- ExecutionPolicy is set per-session (`-ExecutionPolicy Bypass -Scope Process`), never globally modified
-- No telemetry, no phone home
-- WinMaster does NOT modify Windows Defender or security settings
-- Admin privileges are only requested when the application requires them
+### [v1.0.0] — 12/10/2026 *(Bản phát hành đầu tiên)*
+- Ra mắt công cụ **WinMaster** với mục tiêu đơn giản hóa quy trình cài đặt máy tính Windows mới.
+- Hơn 60 ứng dụng được phân loại rõ ràng trong tệp cấu hình `applications.json`.
+- Cơ chế cài đặt tuần tự thông minh (Sequential Installer) ngăn chặn xung đột tiến trình cài đặt.
+- Tích hợp bộ kiểm tra tính toàn vẹn (Verification Engine) xác nhận ứng dụng đã được cài đặt thành công sau mỗi bước.
 
 ---
 
-## Version
+## 🗺️ Lộ trình phát triển (Roadmap)
 
-**Current:** `1.1.5`
-
-Version is managed in a single location:
-- `src/WinMaster/WinMaster.csproj` → `<Version>1.1.5</Version>`
-
----
-
-## Roadmap
-
-| Version | Features |
-|---------|----------|
-| **v1.0** | Install menu, sequential install, verification, fixed sources ✅ |
-| **v1.1** | Tweaks menu, Windows optimization, remove bloatware, activate Windows/Office/IDM ✅ |
-| **v1.1.5** | 3 chế độ cài đặt, PowerShell Live Log, WinUtil progress bar, dọn dẹp file YAML, tối ưu 13 ứng dụng chính thức ✅ |
-| **v1.2** | WinPE menu, công cụ cứu hộ và triển khai hệ điều hành |
-| **v2.0** | Quản lý gỡ cài đặt, kiểm tra cập nhật ứng dụng tự động |
+| Phiên bản | Trọng tâm & Tính năng | Trạng thái |
+|:---:|---|:---:|
+| **v1.0.0** | Giao diện cài đặt một chạm, kiến trúc tuần tự, tích hợp winget & nguồn cố định | ✅ Hoàn thành |
+| **v1.1.0** | Menu TWEAKS, tối ưu hóa hệ điều hành, kích hoạt Windows / Office / IDM / WinRAR | ✅ Hoàn thành |
+| **v1.1.5** | 3 chế độ cài đặt, PowerShell Live Log, dọn dẹp YAML, chuẩn hóa 13 ứng dụng | ✅ Hoàn thành |
+| **v1.1.6** | Chuẩn hóa vị trí cài đặt mặc định, nút xóa log Tweak, hỗ trợ gói .appinstaller | ✅ Hoàn thành |
+| **v1.2.0** | Menu WinPE: Bộ công cụ tạo USB cứu hộ, sao lưu và khôi phục Windows | 🚀 Kế hoạch |
+| **v2.0.0** | Quản lý gỡ cài đặt phần mềm triệt để và tự động kiểm tra bản cập nhật | 🚀 Kế hoạch |
 
 ---
 
-## License
+## 🛡️ Cam kết an toàn & Bảo mật
 
-MIT License — see [LICENSE](LICENSE) file.
+- **Minh bạch mã nguồn:** WinMaster mã nguồn mở 100%, bạn có thể tự kiểm tra mọi dòng code và script trong repository.
+- **Nguồn tải chính thống:** Chỉ tải phần mềm từ các trang chủ chính thức của nhà phát triển, CDN xác thực hoặc kho lưu trữ winget của Microsoft.
+- **Không Telemetry:** Hoàn toàn không thu thập thông tin người dùng, không gửi dữ liệu ra bên ngoài.
+- **Quyền hạn tối thiểu:** Chỉ yêu cầu quyền Administrator đối với các tác vụ can thiệp vào hệ thống cần thiết.
 
 ---
+
+## 📄 Bản quyền (License)
+
+Dự án được phân phối dưới giấy phép **MIT License**. Chi tiết xem tại tệp [LICENSE](LICENSE).
 
 <div align="center">
-  <p>Built with ❤️ for power users who value simplicity</p>
+  <br/>
+  <p>Được phát triển với tất cả tâm huyết dành cho cộng đồng người dùng Windows.</p>
   <p><strong>WinMaster</strong> — TICK → RUN → DONE</p>
 </div>
