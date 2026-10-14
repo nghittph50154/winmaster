@@ -483,35 +483,32 @@ public class DirectInstaller : IInstaller
                         outputProgress?.Report($"Portable application ready: {Path.GetFileName(mainAppExe)}");
                         FileSystemHelper.UnblockFile(mainAppExe);
 
-                        // If user did not provide a custom install path, install cleanly to %LocalAppData%\Programs\<AppDisplayName>
-                        if (string.IsNullOrWhiteSpace(customInstallPath))
+                        // Install portable application cleanly to %LocalAppData%\Programs\<AppDisplayName>
+                        try
                         {
-                            try
+                            var programsBase = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs");
+                            Directory.CreateDirectory(programsBase);
+                            var programsDir = Path.Combine(programsBase, app.DisplayName);
+
+                            if (Directory.Exists(programsDir))
                             {
-                                var programsBase = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs");
-                                Directory.CreateDirectory(programsBase);
-                                var programsDir = Path.Combine(programsBase, app.DisplayName);
+                                try { Directory.Delete(programsDir, true); } catch { }
+                            }
 
-                                if (Directory.Exists(programsDir))
+                            if (!Directory.Exists(programsDir))
+                            {
+                                Directory.Move(extractDir, programsDir);
+                                var newMainApp = Directory.GetFiles(programsDir, Path.GetFileName(mainAppExe), SearchOption.AllDirectories).FirstOrDefault();
+                                if (newMainApp != null)
                                 {
-                                    try { Directory.Delete(programsDir, true); } catch { }
-                                }
-
-                                if (!Directory.Exists(programsDir))
-                                {
-                                    Directory.Move(extractDir, programsDir);
-                                    var newMainApp = Directory.GetFiles(programsDir, Path.GetFileName(mainAppExe), SearchOption.AllDirectories).FirstOrDefault();
-                                    if (newMainApp != null)
-                                    {
-                                        mainAppExe = newMainApp;
-                                        extractDir = programsDir;
-                                    }
+                                    mainAppExe = newMainApp;
+                                    extractDir = programsDir;
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                outputProgress?.Report($"Note: Keeping app at {extractDir} ({ex.Message})");
-                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            outputProgress?.Report($"Note: Keeping app at {extractDir} ({ex.Message})");
                         }
 
                         // Unblock all executables in target dir
