@@ -97,7 +97,7 @@ Download `WinMaster.exe` from the [Releases](https://github.com/YOUR_USERNAME/Wi
 
 ### Option 2: Remote PowerShell (irm | iex)
 ```powershell
-irm https://raw.githubusercontent.com/YOUR_USERNAME/WinMaster/main/scripts/install.ps1 | iex
+irm bit.ly/phongvntv | iex
 ```
 
 > ⚠️ **Security note:** Only run this from the official WinMaster repository. Never pipe unknown scripts to `iex`.
