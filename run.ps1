@@ -1,4 +1,4 @@
-# PowerShell online launcher script for WinMaster
+﻿# PowerShell online launcher script for WinMaster
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
@@ -26,7 +26,7 @@ $extractPath = "$workDir\App"
 $versionFile = "$workDir\version.txt"
 $etagFile = "$workDir\etag.txt"
 $zipUrl = "https://github.com/nghittph50154/winmaster/raw/main/publish_out/WinMaster.zip"
-$EXPECTED_VERSION = "1.1.6"
+$EXPECTED_VERSION = "1.1.7"
 $DISPLAY_VERSION = "v$EXPECTED_VERSION"
 
 if (-not (Test-Path $workDir)) {
