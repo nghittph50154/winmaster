@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using System.Windows;
@@ -59,6 +59,14 @@ public partial class TweaksViewModel : ObservableObject
             showCode: true);
 
         var opt4 = new TweakOptionViewModel(
+            "win11_debloat",
+            "Win11Debloat",
+            "Gỡ bloatware, tắt telemetry và tối ưu hóa Windows 11 với công cụ Win11Debloat — đơn giản, an toàn và mã nguồn mở.",
+            "& ([scriptblock]::Create((irm \"https://debloat.raphi.re/\")))",
+            "powershell",
+            showCode: true);
+
+        var opt5 = new TweakOptionViewModel(
             "winrar_act",
             "WinRAR Activation",
             "Tự động tải và cài đặt bản quyền rarreg.key vào thư mục WinRAR trên máy.",
@@ -70,6 +78,7 @@ public partial class TweaksViewModel : ObservableObject
         Options.Add(opt2);
         Options.Add(opt3);
         Options.Add(opt4);
+        Options.Add(opt5);
 
         // Default selection: option 1
         opt1.IsSelected = true;

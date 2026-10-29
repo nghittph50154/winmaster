@@ -1,11 +1,11 @@
-# WinMaster
+﻿# WinMaster
 
 <div align="center">
-  <h1>🔧 WinMaster v1.1.6</h1>
+  <h1>🔧 WinMaster v1.1.7</h1>
   <p><strong>Windows Utility & Software Installer</strong></p>
   <p><em>TICK → RUN → DONE</em></p>
   
-  ![Version](https://img.shields.io/badge/version-1.1.6-6C63FF?style=flat-square)
+  ![Version](https://img.shields.io/badge/version-1.1.7-6C63FF?style=flat-square)
   ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
   ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square)
   ![WPF](https://img.shields.io/badge/UI-WPF-0078D4?style=flat-square)
@@ -126,7 +126,14 @@ powershell -ExecutionPolicy Bypass -File scripts\pack_release.ps1
 
 ## 📝 Nhật ký thay đổi (Changelog)
 
-### [v1.1.6] — 14/10/2026 *(Phiên bản hiện tại)*
+### [v1.1.7] — 30/10/2026 *(Phiên bản hiện tại)*
+- **Thêm mục Win11Debloat vào menu Tweaks:**
+  - Tích hợp công cụ **Win11Debloat** giúp gỡ bỏ bloatware, tắt telemetry và tối ưu hóa Windows 11 một cách nhanh chóng, an toàn.
+  - Script chạy trực tiếp qua PowerShell: ` & ([scriptblock]::Create((irm "https://debloat.raphi.re/"))) `
+
+---
+
+### [v1.1.6] — 14/10/2026
 - **Loại bỏ hoàn toàn bảng Tweaks Log nhúng trong giao diện:**
   - Bỏ hẳn cột "TWEAKS LOG" bên phải, đưa giao diện tab TWEAKS về bố cục tràn viền (full-width) sạch sẽ, thoáng đãng và rộng rãi tương tự như tab INSTALL.
   - Tích hợp nút **"💻 PowerShell Log"** ngay tại thanh công cụ dưới đáy để người dùng có thể tùy ý mở xem nhật ký thời gian thực khi cần.
@@ -193,6 +200,7 @@ powershell -ExecutionPolicy Bypass -File scripts\pack_release.ps1
 | **v1.1.0** | Menu TWEAKS, tối ưu hóa hệ điều hành, kích hoạt Windows / Office / IDM / WinRAR | ✅ Hoàn thành |
 | **v1.1.5** | 3 chế độ cài đặt, PowerShell Live Log, dọn dẹp YAML, chuẩn hóa 13 ứng dụng | ✅ Hoàn thành |
 | **v1.1.6** | Chuẩn hóa vị trí cài đặt mặc định, nút xóa log Tweak, hỗ trợ gói .appinstaller | ✅ Hoàn thành |
+| **v1.1.7** | Thêm Win11Debloat vào menu Tweaks | ✅ Hoàn thành |
 | **v1.2.0** | Menu WinPE: Bộ công cụ tạo USB cứu hộ, sao lưu và khôi phục Windows | 🚀 Kế hoạch |
 | **v2.0.0** | Quản lý gỡ cài đặt phần mềm triệt để và tự động kiểm tra bản cập nhật | 🚀 Kế hoạch |
 

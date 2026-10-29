@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace WinMaster.ViewModels;
@@ -25,7 +25,7 @@ public partial class MainViewModel : ObservableObject
     public bool IsMenu2Active => ActiveMenu == "menu2";
     public bool IsMenu3Active => ActiveMenu == "menu3";
 
-    public string AppVersion => "v1.1.6";
+    public string AppVersion => "v1.1.7";
 
     public MainViewModel(InstallViewModel installVM, TweaksViewModel tweaksVM)
     {
