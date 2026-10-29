@@ -1,4 +1,4 @@
-﻿# PowerShell online launcher script for WinMaster
+# PowerShell online launcher script for WinMaster
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 

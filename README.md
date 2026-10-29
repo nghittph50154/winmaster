@@ -1,4 +1,4 @@
-﻿# WinMaster
+# WinMaster
 
 <div align="center">
   <h1>🔧 WinMaster v1.1.7</h1>
@@ -202,8 +202,6 @@ powershell -ExecutionPolicy Bypass -File scripts\pack_release.ps1
 | **v1.1.6** | Chuẩn hóa vị trí cài đặt mặc định, nút xóa log Tweak, hỗ trợ gói .appinstaller | ✅ Hoàn thành |
 | **v1.1.7** | Thêm Win11Debloat vào menu Tweaks | ✅ Hoàn thành |
 | **v1.2.0** | Menu WinPE: Bộ công cụ tạo USB cứu hộ, sao lưu và khôi phục Windows | 🚀 Kế hoạch |
-| **v2.0.0** | Quản lý gỡ cài đặt phần mềm triệt để và tự động kiểm tra bản cập nhật | 🚀 Kế hoạch |
-
 ---
 
 ## 🛡️ Cam kết an toàn & Bảo mật
