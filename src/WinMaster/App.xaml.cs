@@ -15,6 +15,16 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        DispatcherUnhandledException += (s, args) =>
+        {
+            MessageBox.Show(
+                $"Đã xảy ra lỗi khởi chạy:\n\n{args.Exception.Message}\n\n{args.Exception.InnerException?.Message}",
+                "WinMaster — Lỗi",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            args.Handled = true;
+        };
+
         // --- Dependency wiring (simple manual DI — no container needed for v1.0) ---
         var psRunner = new PowerShellRunner();
         var logService = new LogService();

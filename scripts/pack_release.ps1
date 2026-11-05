@@ -1,5 +1,6 @@
 # Script to package publish_out into WinMaster.zip
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $publishOut = Join-Path $repoRoot "publish_out"
 $zipPath = Join-Path $publishOut "WinMaster.zip"

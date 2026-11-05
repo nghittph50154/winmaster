@@ -401,7 +401,7 @@
                             <Button Content="⏹  DỪNG" 
                                     Style="{StaticResource DangerButtonStyle}"
                                     Command="{Binding CancelRunCommand}"
-                                    Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}"
                                     ToolTip="Dừng ngay lập tức hàng đợi cài đặt / tải file"/>
 
                             <Button Content="{Binding RunButtonText}"

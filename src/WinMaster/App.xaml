@@ -12,6 +12,7 @@
             <!-- Global converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
             <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+            <converters:BoolToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:InstallStatusToColorConverter x:Key="StatusToColor"/>
             <converters:InstallStatusToTextConverter x:Key="StatusToText"/>
             <converters:LogLevelToColorConverter x:Key="LogLevelToColor"/>
