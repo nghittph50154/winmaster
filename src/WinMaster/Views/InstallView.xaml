@@ -396,13 +396,22 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
 
-                        <Button Grid.Column="2"
-                                Content="{Binding RunButtonText}"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                FontSize="13"
-                                Padding="28,10"
-                                Command="{Binding RunCommand}"
-                                IsEnabled="{Binding CanRun}"/>
+                        <!-- Action Buttons: RUN when idle, STOP when running -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <Button Content="⏹  DỪNG" 
+                                    Style="{StaticResource DangerButtonStyle}"
+                                    Command="{Binding CancelRunCommand}"
+                                    Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="Dừng ngay lập tức hàng đợi cài đặt / tải file"/>
+
+                            <Button Content="{Binding RunButtonText}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    FontSize="13"
+                                    Padding="28,10"
+                                    Command="{Binding RunCommand}"
+                                    IsEnabled="{Binding CanRun}"
+                                    Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}"/>
+                        </StackPanel>
                     </Grid>
                 </Grid>
             </Border>
