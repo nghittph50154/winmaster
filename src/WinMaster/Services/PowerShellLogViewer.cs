@@ -33,7 +33,7 @@ public class PowerShellLogViewer
             lock (_fileLock)
             {
                 using var stream = new FileStream(_logFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-                using var writer = new StreamWriter(stream, Encoding.UTF8);
+                using var writer = new StreamWriter(stream, new UTF8Encoding(false));
                 writer.WriteLine(line);
             }
         }
@@ -53,7 +53,7 @@ public class PowerShellLogViewer
             lock (_fileLock)
             {
                 using var stream = new FileStream(_logFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                using var writer = new StreamWriter(stream, Encoding.UTF8);
+                using var writer = new StreamWriter(stream, new UTF8Encoding(false));
                 writer.WriteLine($"[{DateTime.Now:HH:mm:ss}] [INFO] ─── WinMaster Session Initialized ───");
             }
         }
@@ -79,7 +79,7 @@ public class PowerShellLogViewer
             {
                 if (!File.Exists(_logFilePath))
                 {
-                    File.WriteAllText(_logFilePath, $"[{DateTime.Now:HH:mm:ss}] [INFO] ─── WinMaster Session Started ───\r\n", Encoding.UTF8);
+                    File.WriteAllText(_logFilePath, $"[{DateTime.Now:HH:mm:ss}] [INFO] ─── WinMaster Session Started ───\r\n", new UTF8Encoding(false));
                 }
             }
 
@@ -127,7 +127,7 @@ Get-Content -Path '{escapedPath}' -Wait -Tail 30 -Encoding UTF8 | ForEach-Object
 ";
 
             var scriptFile = Path.Combine(Path.GetDirectoryName(_logFilePath)!, "watch_log.ps1");
-            File.WriteAllText(scriptFile, script, Encoding.UTF8);
+            var utf8NoBom = new UTF8Encoding(false); File.WriteAllText(scriptFile, script, utf8NoBom);
 
             var psi = new ProcessStartInfo
             {

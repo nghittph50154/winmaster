@@ -283,5 +283,77 @@
         </Setter>
     </Style>
 
+    <!-- ═══════════════════════════════════════
+         TOGGLE SWITCH STYLE (ONLINE / OFFLINE)
+         ═══════════════════════════════════════ -->
+    <Style x:Key="ToggleSwitchStyle" TargetType="CheckBox">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid VerticalAlignment="Center">
+                        <!-- Background track -->
+                        <Border x:Name="Track"
+                                Width="52" Height="26"
+                                CornerRadius="13"
+                                Background="#3A3A55"
+                                BorderBrush="#4A4A70"
+                                BorderThickness="1.5">
+                            <Grid>
+                                <!-- Offline text (when unchecked) -->
+                                <TextBlock x:Name="OffText"
+                                           Text="OFF"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="#8E8EA8"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <!-- Online text (when checked) -->
+                                <TextBlock x:Name="OnText"
+                                           Text="ON"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="#FFFFFF"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           Margin="7,0,0,0"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Switch thumb circle -->
+                        <Border x:Name="Thumb"
+                                Width="20" Height="20"
+                                CornerRadius="10"
+                                Background="#E2E8F0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="3,0,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3"/>
+                            </Border.Effect>
+                        </Border>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Checked = Online mode -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="#10B981"/>
+                            <Setter TargetName="Track" Property="BorderBrush" Value="#059669"/>
+                            <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
+                            <Setter TargetName="Thumb" Property="Margin" Value="0,0,3,0"/>
+                            <Setter TargetName="OnText" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="OffText" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <!-- Mouse over -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="Opacity" Value="0.9"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
 

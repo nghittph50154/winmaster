@@ -1086,14 +1086,14 @@
 
     {
       "id": "xp-pen",
-      "name": "XP-Pen Tablet Driver",
-      "displayName": "XP-Pen",
+      "name": "XP-Pen Deco 640 Tablet Driver",
+      "displayName": "XP-Pen Deco 640",
       "category": "Drive",
-      "description": "XP-Pen drawing tablet driver and software chính thức",
-      "tags": ["tablet", "driver", "drawing", "xp-pen"],
+      "description": "Driver và phần mềm chính thức cho bảng vẽ XP-Pen Deco 640 (16K Pressure Levels)",
+      "tags": ["tablet", "driver", "drawing", "xp-pen", "deco", "deco-640"],
       "installer": {
         "type": "direct",
-        "directUrl": "https://www.xp-pen.com/download/file.html?id=2866&pid=66&ext=zip"
+        "directUrl": "https://www.xp-pen.com/download/file.html?id=4935&pid=1094&ext=zip"
       },
       "verification": {
         "strategies": ["executable"],

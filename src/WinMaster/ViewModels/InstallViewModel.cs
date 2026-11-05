@@ -231,18 +231,35 @@ public partial class InstallViewModel : ObservableObject
     {
         CustomInstallPath = FileSystemHelper.GetDownloadsFolder();
     }
-
     [RelayCommand(CanExecute = nameof(CanRun))]
     private async Task RunAsync()
     {
-        var selected = _allApps
+        // 1. Chống gửi lệnh trùng lặp khi đang xử lý
+        if (IsRunning) return;
+
+        // 2. Chụp lại danh sách các ứng dụng đang được chọn (Snapshot độc lập)
+        var selectedCards = _allApps
             .Where(a => a.IsSelected)
             .ToList();
 
-        if (!selected.Any()) return;
+        if (!selectedCards.Any())
+        {
+            CurrentStatusMessage = "Vui lòng chọn ít nhất một ứng dụng.";
+            return;
+        }
 
-        // Reset all statuses
-        foreach (var app in _allApps)
+        // 3. Tự động bỏ tick các ứng dụng đã được tiếp nhận vào hàng đợi xử lý
+        foreach (var app in selectedCards)
+        {
+            app.IsSelected = false;
+        }
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectedCountText));
+        OnPropertyChanged(nameof(CanRun));
+        RunCommand.NotifyCanExecuteChanged();
+
+        // 4. Reset trạng thái các ứng dụng sẽ chạy
+        foreach (var app in selectedCards)
             app.ResetStatus();
 
         LogEntries.Clear();
@@ -250,16 +267,22 @@ public partial class InstallViewModel : ObservableObject
         SessionSummaryText = string.Empty;
         IsRunning = true;
         OverallProgress = 0;
-        CurrentStatusMessage = SelectedInstallMode == InstallMode.DownloadOnly ? "Đang chuẩn bị tải file..." : "Đang chuẩn bị cài đặt...";
+        CurrentStatusMessage = SelectedInstallMode switch
+        {
+            InstallMode.DownloadOnly => "Đang chuẩn bị tải file...",
+            InstallMode.Interactive => "Đang chuẩn bị mở Setup...",
+            _ => "Đang chuẩn bị cài đặt..."
+        };
 
-        // Open live PowerShell log window (like WinUtil)
+        // Mở live PowerShell log window
         _logService.OpenPowerShellWindow();
 
         using var cts = new CancellationTokenSource();
 
         try
         {
-            var entries = selected.Select(a => a.Entry).ToList();
+            // Danh sách entries độc lập không bị ảnh hưởng bởi việc bỏ tick
+            var entries = selectedCards.Select(a => a.Entry).ToList();
             bool isInteractive = SelectedInstallMode == InstallMode.Interactive;
             bool isDownloadOnly = SelectedInstallMode == InstallMode.DownloadOnly;
             await _engine.RunAsync(entries, CustomInstallPath, isInteractive, isDownloadOnly, cts.Token);

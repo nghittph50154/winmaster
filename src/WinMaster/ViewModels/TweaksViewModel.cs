@@ -122,7 +122,8 @@ public partial class TweaksViewModel : ObservableObject
                 var isCmd = SelectedOption.ShellType.Equals("cmd", StringComparison.OrdinalIgnoreCase);
                 string exePath;
                 string arguments;
-
+                string? scriptWorkingDir = null;
+                
                 if (isCmd)
                 {
                     exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
@@ -133,7 +134,67 @@ public partial class TweaksViewModel : ObservableObject
                 {
                     exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
                     if (!File.Exists(exePath)) exePath = "powershell.exe";
-                    arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{SelectedOption.CommandText}\"";
+                                        // Kiểm tra và ưu tiên chạy file script/cmd nội bộ trong thư mục scripts/
+                    string? localScriptPath = null;
+                    
+                    if (SelectedOption.Id == "idm_act")
+                    {
+                        var candidates = new[]
+                        {
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts", "IDM", "ActivateIDM.ps1"),
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\scripts\IDM\ActivateIDM.ps1"),
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts", "IDM", "IASL.cmd"),
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\scripts\IDM\IASL.cmd")
+                        };
+
+                        foreach (var c in candidates)
+                        {
+                            var full = Path.GetFullPath(c);
+                            if (File.Exists(full))
+                            {
+                                localScriptPath = full;
+                                scriptWorkingDir = Path.GetDirectoryName(full);
+                                break;
+                            }
+                        }
+                    }
+                    else if (SelectedOption.Id == "winrar_act")
+                    {
+                        var candidates = new[]
+                        {
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts", "winrar.ps1"),
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\scripts\winrar.ps1")
+                        };
+
+                        foreach (var c in candidates)
+                        {
+                            var full = Path.GetFullPath(c);
+                            if (File.Exists(full))
+                            {
+                                localScriptPath = full;
+                                scriptWorkingDir = Path.GetDirectoryName(full);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(localScriptPath))
+                    {
+                        if (localScriptPath.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase) || localScriptPath.EndsWith(".bat", StringComparison.OrdinalIgnoreCase))
+                        {
+                            exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+                            if (!File.Exists(exePath)) exePath = "cmd.exe";
+                            arguments = $"/c \"\"{localScriptPath}\"\"";
+                        }
+                        else
+                        {
+                            arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{localScriptPath}\"";
+                        }
+                    }
+                    else
+                    {
+                        arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{SelectedOption.CommandText}\"";
+                    }
                 }
 
                 // Try Direct process execution first (bypasses ShellExecute token/elevation conflicts)
@@ -143,7 +204,7 @@ public partial class TweaksViewModel : ObservableObject
                     {
                         FileName = exePath,
                         Arguments = arguments,
-                        WorkingDirectory = Path.GetTempPath(),
+                        WorkingDirectory = !string.IsNullOrEmpty(scriptWorkingDir) ? scriptWorkingDir : Path.GetTempPath(),
                         UseShellExecute = false,
                         CreateNoWindow = false
                     };
@@ -166,7 +227,7 @@ public partial class TweaksViewModel : ObservableObject
                     {
                         FileName = exePath,
                         Arguments = arguments,
-                        WorkingDirectory = Path.GetTempPath(),
+                        WorkingDirectory = !string.IsNullOrEmpty(scriptWorkingDir) ? scriptWorkingDir : Path.GetTempPath(),
                         UseShellExecute = true
                     };
 
