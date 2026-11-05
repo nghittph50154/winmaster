@@ -158,25 +158,6 @@ public partial class TweaksViewModel : ObservableObject
                             }
                         }
                     }
-                    else if (SelectedOption.Id == "winrar_act")
-                    {
-                        var candidates = new[]
-                        {
-                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts", "winrar.ps1"),
-                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\scripts\winrar.ps1")
-                        };
-
-                        foreach (var c in candidates)
-                        {
-                            var full = Path.GetFullPath(c);
-                            if (File.Exists(full))
-                            {
-                                localScriptPath = full;
-                                scriptWorkingDir = Path.GetDirectoryName(full);
-                                break;
-                            }
-                        }
-                    }
 
                     if (!string.IsNullOrEmpty(localScriptPath))
                     {
