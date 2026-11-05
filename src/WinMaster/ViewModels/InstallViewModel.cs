@@ -28,6 +28,7 @@ public partial class InstallViewModel : ObservableObject
 
     // All app card VMs (flat list, then grouped for display)
     private readonly List<ApplicationCardViewModel> _allApps = new();
+    private CancellationTokenSource? _cancellationTokenSource;
 
     public InstallViewModel(AppRegistryService registry, InstallerEngine engine, LogService logService)
     {
@@ -277,7 +278,8 @@ public partial class InstallViewModel : ObservableObject
         // Mở live PowerShell log window
         _logService.OpenPowerShellWindow();
 
-        using var cts = new CancellationTokenSource();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = new CancellationTokenSource();
 
         try
         {
@@ -285,11 +287,13 @@ public partial class InstallViewModel : ObservableObject
             var entries = selectedCards.Select(a => a.Entry).ToList();
             bool isInteractive = SelectedInstallMode == InstallMode.Interactive;
             bool isDownloadOnly = SelectedInstallMode == InstallMode.DownloadOnly;
-            await _engine.RunAsync(entries, CustomInstallPath, isInteractive, isDownloadOnly, cts.Token);
+            await _engine.RunAsync(entries, CustomInstallPath, isInteractive, isDownloadOnly, _cancellationTokenSource.Token);
         }
         finally
         {
             IsRunning = false;
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
         }
     }
 
@@ -308,9 +312,13 @@ public partial class InstallViewModel : ObservableObject
     [RelayCommand]
     private void CancelRun()
     {
-        CurrentStatusMessage = "Đang hủy...";
+        if (IsRunning && _cancellationTokenSource is not null && !_cancellationTokenSource.IsCancellationRequested)
+        {
+            CurrentStatusMessage = "🛑 Đang dừng tiến trình...";
+            _logService.Warning("Người dùng đã bấm dừng tiến trình.");
+            _cancellationTokenSource.Cancel();
+        }
     }
-
     // ─── Engine Event Handlers ───────────────────────────────────────────────
 
     private void OnProgressChanged(object? sender, InstallProgress progress)
